@@ -2097,3 +2097,26 @@ body.is-menu-open { overflow: hidden; }
   html, body { scroll-behavior: auto; }
   .prox-char { transform: none !important; }
 }
+
+.nav-link.is-active::after {
+  left: 50%;
+  right: auto;
+  inset-inline-start: auto;
+  inset-inline-end: auto;
+  transform: translateX(-50%) !important;
+}
+
+.product-detail__cta [data-add-to-cart] > svg {
+  display: none !important;
+}
+
+.product-detail:has(.product-art--ultimate) .product-detail__trust-item:nth-child(2),
+.product-detail:has(.product-art--game) .product-detail__trust-item:nth-child(2),
+.product-detail:has(.product-art--setting) .product-detail__trust-item:nth-child(2),
+.product-detail:has(.product-art--script) .product-detail__trust-item:nth-child(2) {
+  display: none !important;
+}
+
+.product-detail:has(.product-art--accessory) .product-detail__trust-item:nth-child(n + 2) {
+  display: none !important;
+}
