@@ -47,24 +47,38 @@
   }
 
   /* ============================================================
-     2. Canvas particles — proofcore-inspired (sparse + soft)
-     - small particles, soft blue
-     - optional thin connection lines for very close pairs
-     - light mouse parallax
-     - rAF capped to 60fps, paused on visibility hidden
+     2. Canvas — Tactical Signal Field
+     - sparse signal nodes, slow drift + breathing
+     - faint tactical grid (88px cells)
+     - scan pulse rings from random nodes every 3-5s
+     - mouse radar: nearby nodes & connections brighten
+     - connections only within 82px (very sparse)
+     - rAF capped to ~60fps, paused on visibility hidden
      ============================================================ */
   const canvas = document.getElementById("hero-particles");
   if (canvas && !reducedMotion) {
     const ctx = canvas.getContext("2d", { alpha: true });
     let w = 0, h = 0, dpr = 1;
-    let particles = [];
+    let nodes = [];
+    let pulses = [];
     let mx = -9999, my = -9999;
     let rafId = 0;
     let running = true;
     let lastT = 0;
+    let nextPulseT = 0;
 
-    const BASE_COLOR = "3, 131, 244";   // matches --blue
-    const TARGET_DENSITY = 1 / 22000;   // particles per px²
+    const BLUE      = "3, 131, 244";
+    const GRID      = 88;
+    const NODE_MIN  = 12;
+    const NODE_MAX  = 18;
+    const CONN_DIST = 82;
+    const CONN_SQ   = CONN_DIST * CONN_DIST;
+    const RADAR     = 120;
+    const RADAR_SQ  = RADAR * RADAR;
+    const PULSE_MIN = 3000;
+    const PULSE_MAX = 5800;
+    const PULSE_V   = 0.040;
+    const PULSE_MAXR = 128;
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
@@ -78,95 +92,130 @@
     }
 
     function build() {
-      const count = Math.max(18, Math.min(Math.round(w * h * TARGET_DENSITY), 56));
-      particles = new Array(count);
-      for (let i = 0; i < count; i++) {
-        particles[i] = {
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.10,
-          vy: (Math.random() - 0.5) * 0.10,
-          r: Math.random() * 0.9 + 0.5,
-          a: Math.random() * 0.28 + 0.10,
-        };
+      const count = Math.max(NODE_MIN, Math.min(Math.round(w * h / 48000), NODE_MAX));
+      nodes = Array.from({ length: count }, () => ({
+        x:     Math.random() * w,
+        y:     Math.random() * h,
+        vx:    (Math.random() - 0.5) * 0.036,
+        vy:    (Math.random() - 0.5) * 0.036,
+        r:     Math.random() * 1.2 + 0.7,
+        phase: Math.random() * Math.PI * 2,
+        freq:  Math.random() * 0.0006 + 0.0003,
+      }));
+      pulses = [];
+      nextPulseT = 0;
+    }
+
+    function mFactor(x, y) {
+      if (mx < -1000) return 0;
+      const d2 = (x - mx) * (x - mx) + (y - my) * (y - my);
+      return d2 < RADAR_SQ ? 1 - Math.sqrt(d2) / RADAR : 0;
+    }
+
+    function drawGrid() {
+      ctx.strokeStyle = `rgba(${BLUE}, 0.02)`;
+      ctx.lineWidth   = 0.5;
+      const ox = ((w % GRID) / 2) | 0;
+      const oy = ((h % GRID) / 2) | 0;
+      for (let x = ox; x < w; x += GRID) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = oy; y < h; y += GRID) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+    }
+
+    function drawConnections() {
+      ctx.lineWidth = 0.55;
+      for (let i = 0; i < nodes.length; i++) {
+        const a  = nodes[i];
+        const ma = mFactor(a.x, a.y);
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b  = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 >= CONN_SQ) continue;
+          const mb    = mFactor(b.x, b.y);
+          const boost = 1 + (ma + mb) * 3.5;
+          const k     = (1 - d2 / CONN_SQ) * 0.042 * boost;
+          ctx.strokeStyle = `rgba(${BLUE}, ${k.toFixed(3)})`;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+
+    function drawNodes(t) {
+      for (let i = 0; i < nodes.length; i++) {
+        const n  = nodes[i];
+        const mf = mFactor(n.x, n.y);
+        const br = 0.5 + 0.5 * Math.sin(n.phase + t * n.freq);
+        const a  = Math.min(0.82, 0.14 + br * 0.11 + mf * 0.56);
+        const r  = n.r * (1 + mf * 1.8);
+
+        const glowR = r + 3 + mf * 9;
+        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
+        g.addColorStop(0, `rgba(${BLUE}, ${(a * 0.35).toFixed(3)})`);
+        g.addColorStop(1, `rgba(${BLUE}, 0)`);
+        ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
+        ctx.fillStyle = g; ctx.fill();
+
+        ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${BLUE}, ${a.toFixed(3)})`; ctx.fill();
+      }
+    }
+
+    function drawPulses(t) {
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const p    = pulses[i];
+        const r    = (t - p.t0) * PULSE_V;
+        if (r >= PULSE_MAXR) { pulses.splice(i, 1); continue; }
+        const fade = 1 - r / PULSE_MAXR;
+        const a    = 0.36 * fade * fade;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${BLUE}, ${a.toFixed(3)})`;
+        ctx.lineWidth   = 0.7; ctx.stroke();
+        if (r > 14) {
+          ctx.beginPath(); ctx.arc(p.x, p.y, r * 0.52, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${BLUE}, ${(a * 0.26).toFixed(3)})`;
+          ctx.lineWidth   = 0.35; ctx.stroke();
+        }
       }
     }
 
     function step(t) {
       if (!running) { rafId = 0; return; }
-      // throttle to ~60fps
       const dt = t - lastT;
       if (dt < 14) { rafId = requestAnimationFrame(step); return; }
       lastT = t;
 
+      if (t >= nextPulseT && nodes.length) {
+        const n = nodes[Math.floor(Math.random() * nodes.length)];
+        pulses.push({ x: n.x, y: n.y, t0: t });
+        nextPulseT = t + PULSE_MIN + Math.random() * (PULSE_MAX - PULSE_MIN);
+      }
+
       ctx.clearRect(0, 0, w, h);
+      drawGrid();
+      drawConnections();
+      drawPulses(t);
+      drawNodes(t);
 
-      // draw connection lines first (under dots)
-      const CONN_MAX = 110;
-      const CONN_MAX_SQ = CONN_MAX * CONN_MAX;
-      ctx.lineWidth = 1;
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < CONN_MAX_SQ) {
-            const k = 1 - d2 / CONN_MAX_SQ;
-            ctx.strokeStyle = `rgba(${BASE_COLOR}, ${(k * 0.07).toFixed(3)})`;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // update + draw dots
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        // soft mouse repulsion
-        const dx = p.x - mx, dy = p.y - my;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < 9000) {
-          const f = (9000 - d2) / 9000 * 0.45;
-          const inv = 1 / Math.sqrt(d2 + 0.01);
-          p.x += dx * inv * f;
-          p.y += dy * inv * f;
-        }
-        // wrap
-        if (p.x < -4) p.x = w + 4; else if (p.x > w + 4) p.x = -4;
-        if (p.y < -4) p.y = h + 4; else if (p.y > h + 4) p.y = -4;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${BASE_COLOR}, ${p.a.toFixed(3)})`;
-        ctx.fill();
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < -8) n.x = w + 8; else if (n.x > w + 8) n.x = -8;
+        if (n.y < -8) n.y = h + 8; else if (n.y > h + 8) n.y = -8;
       }
 
       rafId = requestAnimationFrame(step);
     }
 
-    function start() {
-      if (rafId) return;
-      running = true;
-      lastT = 0;
-      rafId = requestAnimationFrame(step);
-    }
-    function stop() {
-      running = false;
-      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-    }
+    function start() { if (rafId) return; running = true; lastT = 0; rafId = requestAnimationFrame(step); }
+    function stop()  { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
 
     let canvasResizeTimer = 0;
-    const scheduleCanvasResize = () => {
-      clearTimeout(canvasResizeTimer);
-      canvasResizeTimer = setTimeout(resize, 120);
-    };
-    window.addEventListener("resize", scheduleCanvasResize, { passive: true });
+    const scheduleCanvasResize = () => { clearTimeout(canvasResizeTimer); canvasResizeTimer = setTimeout(resize, 120); };
+    window.addEventListener("resize",            scheduleCanvasResize, { passive: true });
     window.addEventListener("orientationchange", scheduleCanvasResize, { passive: true });
     window.addEventListener("pointermove", (e) => {
       const rect = canvas.getBoundingClientRect();
@@ -174,53 +223,56 @@
       my = e.clientY - rect.top;
     }, { passive: true });
     window.addEventListener("pointerleave", () => { mx = my = -9999; });
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) stop(); else start();
-    });
+    document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); else start(); });
 
     resize();
     start();
   }
 
   /* ============================================================
-     3. Hero proximity headline — transform-only, no reflow
-     - reads pointer once per rAF
-     - writes two CSS variables (--mx, --my) on the title
-     - each word uses transform: translate3d(calc(...), calc(...), 0)
-     - zero font-weight or letter-spacing animation (no reflow)
+     3. Hero — Tactical Magnetic Headline
+     - writes --mx / --my / --prox-glow on the title element
+     - each word shifts via translate3d (CSS calc, zero reflow)
+     - --prox-glow drives blue glow intensity on the bottom line
+     - clamped to ±1.0 so words stay cohesive (was ±1.4)
      ============================================================ */
   const title = document.querySelector("[data-proximity-target]");
   if (title && !reducedMotion && !isCoarse) {
-    let pmx = 0, pmy = 0;          // pointer relative to title (-1..1)
-    let cur = { x: 0, y: 0 };      // smoothed
+    let pmx = 0, pmy = 0, pglow = 0;
+    let cur = { x: 0, y: 0, g: 0 };
     let raf = 0;
     let active = false;
-    const SMOOTH = 0.12;           // easing toward target
+    const SMOOTH = 0.09;
 
     function onMove(e) {
-      const r = title.getBoundingClientRect();
-      const px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-      const py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-      pmx = Math.max(-1.4, Math.min(1.4, px));
-      pmy = Math.max(-1.4, Math.min(1.4, py));
+      const r  = title.getBoundingClientRect();
+      const px = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
+      const py = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
+      pmx   = Math.max(-1.0, Math.min(1.0, px));
+      pmy   = Math.max(-1.0, Math.min(1.0, py));
+      pglow = Math.max(0, 1 - Math.sqrt(px * px + py * py) * 0.78);
       if (!active) { active = true; raf = requestAnimationFrame(loop); }
     }
 
-    function onLeave() {
-      pmx = 0; pmy = 0;
-    }
+    function onLeave() { pmx = 0; pmy = 0; pglow = 0; }
 
     function loop() {
-      cur.x += (pmx - cur.x) * SMOOTH;
-      cur.y += (pmy - cur.y) * SMOOTH;
-      title.style.setProperty("--mx", cur.x.toFixed(3));
-      title.style.setProperty("--my", cur.y.toFixed(3));
-      if (Math.abs(cur.x - pmx) > 0.001 || Math.abs(cur.y - pmy) > 0.001 || pmx !== 0 || pmy !== 0) {
+      cur.x += (pmx   - cur.x) * SMOOTH;
+      cur.y += (pmy   - cur.y) * SMOOTH;
+      cur.g += (pglow - cur.g) * SMOOTH;
+      title.style.setProperty("--mx",        cur.x.toFixed(3));
+      title.style.setProperty("--my",        cur.y.toFixed(3));
+      title.style.setProperty("--prox-glow", cur.g.toFixed(3));
+      const still = Math.abs(cur.x - pmx) < 0.001
+                 && Math.abs(cur.y - pmy) < 0.001
+                 && Math.abs(cur.g - pglow) < 0.001;
+      if (!still || pmx !== 0 || pmy !== 0 || pglow !== 0) {
         raf = requestAnimationFrame(loop);
       } else {
         active = false;
-        title.style.setProperty("--mx", 0);
-        title.style.setProperty("--my", 0);
+        title.style.setProperty("--mx",        "0");
+        title.style.setProperty("--my",        "0");
+        title.style.setProperty("--prox-glow", "0");
       }
     }
 

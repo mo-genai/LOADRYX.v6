@@ -489,6 +489,7 @@ html[dir="rtl"] .hero-fallback {
 .hero-title {
   --mx: 0;
   --my: 0;
+  --prox-glow: 0;
   margin: 0 0 24px;
   font-family: var(--font-arabic-display);
   line-height: 0.98;
@@ -514,25 +515,34 @@ html[dir="rtl"] .hero-fallback {
   color: var(--blue);
   margin-top: 2px;
   letter-spacing: -0.015em;
-  text-shadow: 0 0 32px rgba(3,131,244,.18);
 }
-.hero-title__line .prox-char + .prox-char { margin-inline-start: .38em; }
+.hero-title__line .prox-char + .prox-char { margin-inline-start: .16em; }
 
 .prox-char {
   display: inline-block;
-  /* transform-only animation — no layout reflow */
   transform: translate3d(
-    calc(var(--mx, 0) * var(--wx, 6px)),
-    calc(var(--my, 0) * var(--wy, 4px)),
+    calc(var(--mx, 0) * var(--wx, 3px)),
+    calc(var(--my, 0) * var(--wy, 2px)),
     0
   );
-  transition: transform 220ms var(--ease-out);
+  transition: transform 150ms var(--ease);
   will-change: transform;
 }
-/* alternate words shift in different directions (proofcore-style depth) */
-.hero-title__line .prox-char:nth-child(1) { --wx:  6px; --wy:  4px; }
-.hero-title__line .prox-char:nth-child(2) { --wx: -8px; --wy: -3px; }
-.hero-title__line .prox-char:nth-child(3) { --wx:  4px; --wy:  5px; }
+/* alternate words — reduced range so headline stays cohesive */
+.hero-title__line .prox-char:nth-child(1) { --wx:  3px; --wy:  2px; }
+.hero-title__line .prox-char:nth-child(2) { --wx: -3.5px; --wy: -1.5px; }
+.hero-title__line .prox-char:nth-child(3) { --wx:  2px; --wy:  2px; }
+/* bottom line: tactical skew + radar glow */
+.hero-title__line--bot .prox-char {
+  transform: translate3d(
+    calc(var(--mx, 0) * var(--wx, 3px)),
+    calc(var(--my, 0) * var(--wy, 2px)),
+    0
+  ) skewX(calc(var(--mx, 0) * -0.35deg));
+  text-shadow:
+    0 0 calc(18px + var(--prox-glow, 0) * 30px) rgb(3 131 244 / calc(.15 + var(--prox-glow, 0) * .38)),
+    0 0 55px rgb(3 131 244 / calc(.04 + var(--prox-glow, 0) * .10));
+}
 
 .hero-subtitle {
   margin: 0 0 32px;
