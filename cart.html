@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02070D" />
+  <title>السلة — LOADRYX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
+
+  <main id="main">
+    <section class="page-hero" style="padding-bottom:24px;">
+      <div class="page-hero__inner">
+        <nav class="breadcrumbs">
+          <a href="index.html">الرئيسية</a>
+          <span class="breadcrumbs__sep">/</span>
+          <span class="breadcrumbs__item--current">السلة</span>
+        </nav>
+        <h1 class="page-title">سلة <span class="text-blue">المشتريات.</span></h1>
+        <p class="page-sub">راجع طلبك قبل الانتقال إلى إتمام الشراء — يمكنك التعديل أو الحذف في أي لحظة.</p>
+      </div>
+    </section>
+
+    <section class="cart-page">
+      <div class="cart-page__grid">
+        <div class="cart-table">
+          <div class="cart-table__header">
+            <span>المنتج</span>
+            <span></span>
+            <span>الكمية</span>
+            <span>السعر</span>
+            <span></span>
+          </div>
+          <div data-cart-rows></div>
+        </div>
+
+        <aside class="cart-summary" data-cart-summary>
+          <h3>ملخّص الطلب</h3>
+          <div class="cart-summary__row">
+            <span>المجموع الفرعي</span>
+            <span class="price"><span class="price__amount" data-summary-subtotal>0</span><span class="price__currency"><svg class="sar-icon"><use href="#sar-symbol"/></svg></span></span>
+          </div>
+          <div class="cart-summary__row">
+            <span>الشحن</span>
+            <span style="color:var(--muted);">يُحتسب عند الدفع</span>
+          </div>
+          <div class="cart-summary__row cart-summary__row--total">
+            <span>الإجمالي</span>
+            <span class="price"><span class="price__amount" data-summary-total>0</span><span class="price__currency"><svg class="sar-icon"><use href="#sar-symbol"/></svg></span></span>
+          </div>
+          <div class="cart-summary__actions">
+            <a href="checkout.html" class="btn btn--primary btn--solid btn--full">إتمام الطلب</a>
+            <a href="products.html" class="btn btn--ghost-line btn--full">متابعة التسوّق</a>
+          </div>
+          <div class="cart-summary__pay">
+            <span class="pay-chip">مدى</span>
+            <span class="pay-chip">VISA</span>
+            <span class="pay-chip">Mastercard</span>
+            <span class="pay-chip">Apple Pay</span>
+            <span class="pay-chip">STC Pay</span>
+            <span class="pay-chip pay-chip--accent">tabby</span>
+            <span class="pay-chip pay-chip--accent">tamara</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script src="partials.js" defer></script>
+  <script src="render.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>

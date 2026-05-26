@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02070D" />
+  <title>إتمام الطلب — LOADRYX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
+
+  <main id="main">
+    <section class="page-hero" style="padding-bottom:24px;">
+      <div class="page-hero__inner">
+        <nav class="breadcrumbs">
+          <a href="index.html">الرئيسية</a>
+          <span class="breadcrumbs__sep">/</span>
+          <a href="cart.html">السلة</a>
+          <span class="breadcrumbs__sep">/</span>
+          <span class="breadcrumbs__item--current">إتمام الطلب</span>
+        </nav>
+        <h1 class="page-title">إتمام <span class="text-blue">الطلب.</span></h1>
+        <p class="page-sub">أكمل بياناتك واختر طريقة الدفع — يمكنك الشراء كضيف أو إنشاء حساب اختياري.</p>
+      </div>
+    </section>
+
+    <section class="checkout">
+      <div class="checkout__grid">
+        <form class="checkout-form" data-checkout-form onsubmit="return false;">
+          <div class="checkout-section">
+            <h3>بيانات العميل</h3>
+            <p class="checkout-section__hint">سيتم استخدام هذه البيانات لتواصل التوصيل وإصدار الفاتورة.</p>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="ckt-fname">الاسم الأول</label>
+                <input type="text" id="ckt-fname" name="fname" required autocomplete="given-name" />
+              </div>
+              <div class="field">
+                <label for="ckt-lname">الاسم الأخير</label>
+                <input type="text" id="ckt-lname" name="lname" required autocomplete="family-name" />
+              </div>
+              <div class="field">
+                <label for="ckt-phone">رقم الجوال</label>
+                <input type="tel" id="ckt-phone" name="phone" required placeholder="05xxxxxxxx" autocomplete="tel" dir="ltr" />
+              </div>
+              <div class="field">
+                <label for="ckt-email">البريد الإلكتروني</label>
+                <input type="email" id="ckt-email" name="email" required autocomplete="email" dir="ltr" />
+              </div>
+              <div class="field field--full">
+                <label for="ckt-city">المدينة</label>
+                <input type="text" id="ckt-city" name="city" required autocomplete="address-level2" />
+              </div>
+              <div class="field field--full">
+                <label for="ckt-address">العنوان</label>
+                <input type="text" id="ckt-address" name="address" required autocomplete="street-address" />
+              </div>
+              <div class="field field--full">
+                <label for="ckt-notes">ملاحظات إضافية (اختياري)</label>
+                <textarea id="ckt-notes" name="notes" placeholder="مثلاً: موعد الجلسة المفضل، أو أي تعليمات خاصة"></textarea>
+              </div>
+            </div>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="create-account" />
+              <span>إنشاء حساب اختياري لمتابعة الطلبات والفواتير لاحقاً.</span>
+            </label>
+          </div>
+
+          <div class="checkout-section">
+            <h3>طريقة الدفع</h3>
+            <p class="checkout-section__hint">جميع طرق الدفع التالية متاحة لدينا — اختر ما يناسبك.</p>
+
+            <div class="pay-methods" role="radiogroup" aria-label="طرق الدفع">
+              <label class="pay-method is-active">
+                <input type="radio" name="pay" value="mada" checked />
+                <span><span class="pay-method__name">مدى</span><span class="pay-method__sub">بطاقة مدى المحلية</span></span>
+              </label>
+              <label class="pay-method">
+                <input type="radio" name="pay" value="visa" />
+                <span><span class="pay-method__name">VISA</span><span class="pay-method__sub">بطاقة فيزا</span></span>
+              </label>
+              <label class="pay-method">
+                <input type="radio" name="pay" value="mastercard" />
+                <span><span class="pay-method__name">Mastercard</span><span class="pay-method__sub">بطاقة ماستركارد</span></span>
+              </label>
+              <label class="pay-method">
+                <input type="radio" name="pay" value="applepay" />
+                <span><span class="pay-method__name">Apple Pay</span><span class="pay-method__sub">دفع سريع آمن</span></span>
+              </label>
+              <label class="pay-method">
+                <input type="radio" name="pay" value="stcpay" />
+                <span><span class="pay-method__name">STC Pay</span><span class="pay-method__sub">محفظة STC Pay</span></span>
+              </label>
+              <label class="pay-method">
+                <input type="radio" name="pay" value="tabby" />
+                <span><span class="pay-method__name">tabby</span><span class="pay-method__sub">قسّم على 4 دفعات بدون فوائد</span></span>
+              </label>
+              <label class="pay-method">
+                <input type="radio" name="pay" value="tamara" />
+                <span><span class="pay-method__name">tamara</span><span class="pay-method__sub">ادفع لاحقاً أو قسّمها</span></span>
+              </label>
+            </div>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="agree" required />
+              <span>أوافق على <a href="#policy" style="color:var(--blue);">الشروط والأحكام</a> وسياسة الخصوصية.</span>
+            </label>
+
+            <div style="margin-top:24px;">
+              <button type="submit" class="btn btn--primary btn--solid btn--full" data-checkout-submit>إتمام الطلب الآن</button>
+            </div>
+          </div>
+        </form>
+
+        <aside class="cart-summary">
+          <h3>ملخّص الطلب</h3>
+          <div data-checkout-lines></div>
+          <div class="cart-summary__row cart-summary__row--total">
+            <span>الإجمالي</span>
+            <span class="price"><span class="price__amount" data-checkout-total>0</span><span class="price__currency"><svg class="sar-icon"><use href="#sar-symbol"/></svg></span></span>
+          </div>
+          <div class="cart-summary__pay">
+            <span class="pay-chip">مدى</span>
+            <span class="pay-chip">VISA</span>
+            <span class="pay-chip">Mastercard</span>
+            <span class="pay-chip">Apple Pay</span>
+            <span class="pay-chip">STC Pay</span>
+            <span class="pay-chip pay-chip--accent">tabby</span>
+            <span class="pay-chip pay-chip--accent">tamara</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script src="partials.js" defer></script>
+  <script src="render.js" defer></script>
+  <script src="script.js" defer></script>
+  <script defer>
+    // payment method active state
+    document.addEventListener("change", (e) => {
+      if (e.target.name === "pay") {
+        document.querySelectorAll(".pay-method").forEach((m) => m.classList.toggle("is-active", m.contains(e.target)));
+      }
+    });
+    // submit demo
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("[data-checkout-submit]")) {
+        const form = document.querySelector("[data-checkout-form]");
+        if (form && !form.reportValidity()) return;
+        alert("تم استلام الطلب! سيتم إكمال عملية الدفع بعد ربط المتجر بـ WooCommerce.");
+      }
+    });
+  </script>
+</body>
+</html>

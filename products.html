@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02070D" />
+  <title>المنتجات — LOADRYX</title>
+  <meta name="description" content="جميع منتجات LOADRYX — باكجات PS5 AI، سكربتات Xim Matrix، خدمات Setting AI، والملحقات." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="page-hero__inner">
+        <nav class="breadcrumbs" aria-label="مسار التصفّح">
+          <a href="index.html">الرئيسية</a>
+          <span class="breadcrumbs__sep">/</span>
+          <span class="breadcrumbs__item--current">المنتجات</span>
+        </nav>
+        <h1 class="page-title">جميع <span class="text-blue">المنتجات.</span></h1>
+        <p class="page-sub">تصفّح المتجر كاملاً — من باكجات الذكاء الاصطناعي للـ PS5 إلى السكربتات الاحترافية والملحقات.</p>
+      </div>
+    </section>
+
+    <section class="section section--deep">
+      <div class="section-inner">
+        <nav class="cat-tabs" aria-label="فلترة الفئة" style="margin-bottom:32px;">
+          <a class="cat-tab is-active" href="products.html">
+            <span class="cat-tab__name">الكل</span>
+            <span class="cat-tab__count" data-count-all></span>
+          </a>
+          <a class="cat-tab" href="category.html?cat=ps5"><span class="cat-tab__name">PS5 AI</span><span class="cat-tab__count">7 منتجات</span></a>
+          <a class="cat-tab" href="category.html?cat=setting"><span class="cat-tab__name">Setting AI</span><span class="cat-tab__count">منتجان</span></a>
+          <a class="cat-tab" href="category.html?cat=script"><span class="cat-tab__name">Script Xim Matrix</span><span class="cat-tab__count">منتجان</span></a>
+          <a class="cat-tab" href="category.html?cat=accessories"><span class="cat-tab__name">الملحقات</span><span class="cat-tab__count">3 منتجات</span></a>
+          <a class="cat-tab" href="category.html?cat=games"><span class="cat-tab__name">الألعاب</span><span class="cat-tab__count">قريباً</span></a>
+        </nav>
+
+        <div data-all-products></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script src="partials.js" defer></script>
+  <script src="render.js" defer></script>
+  <script src="script.js" defer></script>
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
+      const tryCount = () => {
+        if (!window.LR_DATA) return setTimeout(tryCount, 30);
+        const el = document.querySelector("[data-count-all]");
+        if (el) el.textContent = window.LR_DATA.PRODUCTS.length + " منتج";
+      };
+      tryCount();
+    });
+  </script>
+</body>
+</html>

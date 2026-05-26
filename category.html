@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02070D" />
+  <title>الفئة — LOADRYX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="page-hero__inner">
+        <nav class="breadcrumbs" aria-label="مسار التصفّح">
+          <a href="index.html">الرئيسية</a>
+          <span class="breadcrumbs__sep">/</span>
+          <a href="products.html">المنتجات</a>
+          <span class="breadcrumbs__sep">/</span>
+          <span class="breadcrumbs__item--current" data-cat-crumb></span>
+        </nav>
+        <h1 class="page-title" data-cat-title></h1>
+        <p class="page-sub" data-cat-sub></p>
+      </div>
+    </section>
+
+    <section class="section section--deep">
+      <div class="section-inner">
+        <div data-category-products></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script src="partials.js" defer></script>
+  <script src="render.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>

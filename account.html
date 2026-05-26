@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02070D" />
+  <title>حسابي — LOADRYX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
+
+  <main id="main">
+    <section class="page-hero" style="padding-bottom:24px;">
+      <div class="page-hero__inner">
+        <nav class="breadcrumbs">
+          <a href="index.html">الرئيسية</a>
+          <span class="breadcrumbs__sep">/</span>
+          <span class="breadcrumbs__item--current">حسابي</span>
+        </nav>
+        <h1 class="page-title">حسابي في <span class="text-blue">LOADRYX.</span></h1>
+        <p class="page-sub">سجّل دخولك للاطّلاع على طلباتك وفواتيرك، أو أنشئ حساباً جديداً — الشراء كضيف متاح دائماً.</p>
+      </div>
+    </section>
+
+    <section class="account">
+      <div class="account__grid">
+        <article class="account-card">
+          <h3>تسجيل الدخول</h3>
+          <p>للوصول إلى طلباتك السابقة وفواتيرك والمتابعة مع الدعم.</p>
+          <form onsubmit="return false;">
+            <div class="field">
+              <label for="login-email">البريد الإلكتروني</label>
+              <input type="email" id="login-email" autocomplete="email" dir="ltr" required />
+            </div>
+            <div class="field">
+              <label for="login-password">كلمة المرور</label>
+              <input type="password" id="login-password" autocomplete="current-password" required />
+            </div>
+            <button type="submit" class="btn btn--primary btn--solid btn--full" style="margin-top:8px;">دخول</button>
+            <p class="account-foot">نسيت كلمة المرور؟ <a href="#reset">إعادة تعيين</a></p>
+          </form>
+        </article>
+
+        <article class="account-card">
+          <h3>إنشاء حساب</h3>
+          <p>أنشئ حسابك في دقيقة — اختياري تماماً، والشراء كضيف متاح في كل وقت.</p>
+          <form onsubmit="return false;">
+            <div class="field">
+              <label for="reg-name">الاسم الكامل</label>
+              <input type="text" id="reg-name" autocomplete="name" required />
+            </div>
+            <div class="field">
+              <label for="reg-email">البريد الإلكتروني</label>
+              <input type="email" id="reg-email" autocomplete="email" dir="ltr" required />
+            </div>
+            <div class="field">
+              <label for="reg-password">كلمة المرور</label>
+              <input type="password" id="reg-password" autocomplete="new-password" required />
+            </div>
+            <button type="submit" class="btn btn--primary btn--solid btn--full" style="margin-top:8px;">إنشاء الحساب</button>
+            <p class="account-foot">بإنشاء الحساب توافق على <a href="#policy">الشروط والخصوصية</a>.</p>
+          </form>
+        </article>
+      </div>
+
+      <div class="account-card" style="margin-top:22px;">
+        <h3 id="orders">طلباتي</h3>
+        <p>سيظهر هنا سجل طلباتك وفواتيرك بعد ربط المتجر بـ WooCommerce.</p>
+        <a href="products.html" class="btn btn--ghost-line">ابدأ بأول طلب</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="data.js" defer></script>
+  <script src="cart.js" defer></script>
+  <script src="partials.js" defer></script>
+  <script src="render.js" defer></script>
+  <script src="script.js" defer></script>
+</body>
+</html>

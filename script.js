@@ -1,14 +1,10 @@
 /* ============================================================
-   LOADRYX — site interactivity
-   - canvas particles + Variable Proximity (hero)
-   - mobile menu toggle
-   - smooth-scroll for nav links
-   - scroll-spy: active nav link + section indicator
-   - product category tabs
-   - scroll-reveal observer
-   - header scroll state
-   - footer year
-   - respects prefers-reduced-motion
+   LOADRYX — main script
+   - Hero proximity headline (transform-only, GPU, zero reflow)
+   - Canvas particles (proofcore-inspired: sparse + connections)
+   - Cart drawer + page-level cart sync
+   - Mobile menu, smooth scroll, scroll-spy, accordion, reveal
+   - Header scroll state
    ============================================================ */
 
 (function () {
@@ -16,104 +12,129 @@
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const isCoarse      = window.matchMedia("(pointer: coarse)").matches;
-  const isRTL         = document.documentElement.dir === "rtl";
 
   /* ============================================================
-     1. Footer year
+     1. Hero video error fallback
      ============================================================ */
-  document.querySelectorAll("[data-year]").forEach((el) => {
-    el.textContent = new Date().getFullYear();
-  });
-
-  /* ============================================================
-     2. Hero video fallback
-     ============================================================ */
-  const media = document.querySelector(".hero-media");
-  const video = document.querySelector(".hero-video");
-  if (video && media) {
-    const markFailed = () => media.classList.add("is-video-failed");
-    video.addEventListener("error", markFailed, { once: true });
-    video.addEventListener("stalled", () => {
-      if (video.readyState < 2) markFailed();
-    });
-    const tryPlay = () => {
-      const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    };
-    tryPlay();
+  const videoMedia = document.querySelector(".hero-media");
+  const heroVideo  = document.querySelector(".hero-video");
+  if (heroVideo && videoMedia) {
+    const fail = () => videoMedia.classList.add("is-video-failed");
+    heroVideo.addEventListener("error", fail, { once: true });
+    heroVideo.addEventListener("stalled", () => { if (heroVideo.readyState < 2) fail(); });
+    const p = heroVideo.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
   }
 
   /* ============================================================
-     3. Canvas particles
+     2. Canvas particles — proofcore-inspired (sparse + soft)
+     - small particles, soft blue
+     - optional thin connection lines for very close pairs
+     - light mouse parallax
+     - rAF capped to 60fps, paused on visibility hidden
      ============================================================ */
   const canvas = document.getElementById("hero-particles");
   if (canvas && !reducedMotion) {
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     let w = 0, h = 0, dpr = 1;
     let particles = [];
-    let mouseX = -9999, mouseY = -9999;
+    let mx = -9999, my = -9999;
     let rafId = 0;
     let running = true;
+    let lastT = 0;
 
-    const COLOR = "rgba(3, 131, 244, %a)";
+    const BASE_COLOR = "3, 131, 244";   // matches --blue
+    const TARGET_DENSITY = 1 / 22000;   // particles per px²
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = rect.width; h = rect.height;
+      w = rect.width;
+      h = rect.height;
       canvas.width  = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      buildParticles();
+      build();
     }
 
-    function buildParticles() {
-      const target = Math.round((w * h) / 38000);
-      const count = Math.max(18, Math.min(target, 48));
-      particles = [];
+    function build() {
+      const count = Math.max(18, Math.min(Math.round(w * h * TARGET_DENSITY), 56));
+      particles = new Array(count);
       for (let i = 0; i < count; i++) {
-        particles.push({
+        particles[i] = {
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.08,
-          vy: (Math.random() - 0.5) * 0.08,
-          r: Math.random() * 0.9 + 0.3,
-          a: Math.random() * 0.28 + 0.08,
-        });
+          vx: (Math.random() - 0.5) * 0.10,
+          vy: (Math.random() - 0.5) * 0.10,
+          r: Math.random() * 0.9 + 0.5,
+          a: Math.random() * 0.28 + 0.10,
+        };
       }
     }
 
-    function frame() {
+    function step(t) {
       if (!running) { rafId = 0; return; }
+      // throttle to ~60fps
+      const dt = t - lastT;
+      if (dt < 14) { rafId = requestAnimationFrame(step); return; }
+      lastT = t;
+
       ctx.clearRect(0, 0, w, h);
+
+      // draw connection lines first (under dots)
+      const CONN_MAX = 110;
+      const CONN_MAX_SQ = CONN_MAX * CONN_MAX;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < particles.length; i++) {
+        const a = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < CONN_MAX_SQ) {
+            const k = 1 - d2 / CONN_MAX_SQ;
+            ctx.strokeStyle = `rgba(${BASE_COLOR}, ${(k * 0.07).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // update + draw dots
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
-        const dx = p.x - mouseX;
-        const dy = p.y - mouseY;
-        const dist2 = dx * dx + dy * dy;
-        if (dist2 < 10000) {
-          const f = (10000 - dist2) / 10000;
-          p.x += (dx / Math.sqrt(dist2 + 0.001)) * f * 0.4;
-          p.y += (dy / Math.sqrt(dist2 + 0.001)) * f * 0.4;
+        // soft mouse repulsion
+        const dx = p.x - mx, dy = p.y - my;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 9000) {
+          const f = (9000 - d2) / 9000 * 0.45;
+          const inv = 1 / Math.sqrt(d2 + 0.01);
+          p.x += dx * inv * f;
+          p.y += dy * inv * f;
         }
-        if (p.x < -4) p.x = w + 4;
-        if (p.x > w + 4) p.x = -4;
-        if (p.y < -4) p.y = h + 4;
-        if (p.y > h + 4) p.y = -4;
+        // wrap
+        if (p.x < -4) p.x = w + 4; else if (p.x > w + 4) p.x = -4;
+        if (p.y < -4) p.y = h + 4; else if (p.y > h + 4) p.y = -4;
+
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = COLOR.replace("%a", p.a.toFixed(3));
+        ctx.fillStyle = `rgba(${BASE_COLOR}, ${p.a.toFixed(3)})`;
         ctx.fill();
       }
-      rafId = requestAnimationFrame(frame);
+
+      rafId = requestAnimationFrame(step);
     }
 
     function start() {
       if (rafId) return;
       running = true;
-      rafId = requestAnimationFrame(frame);
+      lastT = 0;
+      rafId = requestAnimationFrame(step);
     }
     function stop() {
       running = false;
@@ -121,12 +142,12 @@
     }
 
     window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener("mousemove", (e) => {
+    window.addEventListener("pointermove", (e) => {
       const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
+      mx = e.clientX - rect.left;
+      my = e.clientY - rect.top;
     }, { passive: true });
-    window.addEventListener("mouseleave", () => { mouseX = mouseY = -9999; });
+    window.addEventListener("pointerleave", () => { mx = my = -9999; });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stop(); else start();
     });
@@ -136,64 +157,67 @@
   }
 
   /* ============================================================
-     4. Variable Proximity headline
+     3. Hero proximity headline — transform-only, no reflow
+     - reads pointer once per rAF
+     - writes two CSS variables (--mx, --my) on the title
+     - each word uses transform: translate3d(calc(...), calc(...), 0)
+     - zero font-weight or letter-spacing animation (no reflow)
      ============================================================ */
-  if (!reducedMotion && !isCoarse) {
-    const lines = document.querySelectorAll("[data-proximity-line]");
-    if (lines.length) {
-      const charsByLine = Array.from(lines).map((line) =>
-        Array.from(line.querySelectorAll(".prox-char")).map((el) => ({
-          el,
-          baseWeight: parseInt(getComputedStyle(el).fontWeight, 10) || 400,
-        }))
-      );
-      const RADIUS = 140;
-      const RADIUS_SQ = RADIUS * RADIUS;
-      let mx = -9999, my = -9999;
-      let pending = false;
+  const title = document.querySelector("[data-proximity-target]");
+  if (title && !reducedMotion && !isCoarse) {
+    let pmx = 0, pmy = 0;          // pointer relative to title (-1..1)
+    let cur = { x: 0, y: 0 };      // smoothed
+    let raf = 0;
+    let active = false;
+    const SMOOTH = 0.12;           // easing toward target
 
-      function update() {
-        pending = false;
-        for (let li = 0; li < lines.length; li++) {
-          const chars = charsByLine[li];
-          for (let i = 0; i < chars.length; i++) {
-            const { el, baseWeight } = chars[i];
-            const r = el.getBoundingClientRect();
-            const cx = r.left + r.width / 2;
-            const cy = r.top + r.height / 2;
-            const dx = mx - cx;
-            const dy = my - cy;
-            const d2 = dx * dx + dy * dy;
-            if (d2 < RADIUS_SQ) {
-              const t = 1 - d2 / RADIUS_SQ;
-              const weight = Math.round(baseWeight + t * (900 - baseWeight) * 0.55);
-              el.style.fontWeight = weight;
-              el.style.transform = `translateY(${(-t * 1.2).toFixed(2)}px)`;
-            } else if (el.style.fontWeight) {
-              el.style.fontWeight = "";
-              el.style.transform = "";
-            }
-          }
-        }
-      }
-
-      window.addEventListener("mousemove", (e) => {
-        mx = e.clientX; my = e.clientY;
-        if (!pending) { pending = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      window.addEventListener("mouseleave", () => {
-        mx = my = -9999;
-        if (!pending) { pending = true; requestAnimationFrame(update); }
-      });
+    function onMove(e) {
+      const r = title.getBoundingClientRect();
+      const px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+      const py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+      pmx = Math.max(-1.4, Math.min(1.4, px));
+      pmy = Math.max(-1.4, Math.min(1.4, py));
+      if (!active) { active = true; raf = requestAnimationFrame(loop); }
     }
+
+    function onLeave() {
+      pmx = 0; pmy = 0;
+    }
+
+    function loop() {
+      cur.x += (pmx - cur.x) * SMOOTH;
+      cur.y += (pmy - cur.y) * SMOOTH;
+      title.style.setProperty("--mx", cur.x.toFixed(3));
+      title.style.setProperty("--my", cur.y.toFixed(3));
+      if (Math.abs(cur.x - pmx) > 0.001 || Math.abs(cur.y - pmy) > 0.001 || pmx !== 0 || pmy !== 0) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        active = false;
+        title.style.setProperty("--mx", 0);
+        title.style.setProperty("--my", 0);
+      }
+    }
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerleave", onLeave, { passive: true });
   }
+
+  /* ============================================================
+     4. Header scroll state
+     ============================================================ */
+  const header = document.querySelector(".site-header");
+  function onScrollHeader() {
+    if (header) header.classList.toggle("is-scrolled", window.pageYOffset > 12);
+  }
+  window.addEventListener("scroll", onScrollHeader, { passive: true });
+  onScrollHeader();
 
   /* ============================================================
      5. Mobile menu
      ============================================================ */
-  const navEl = document.getElementById("primary-nav");
+  const navEl   = document.getElementById("primary-nav");
   const openBtn = document.querySelector("[data-menu-open]");
-  const closeBtn = document.querySelector("[data-menu-close]");
+  const closeBtn= document.querySelector("[data-menu-close]");
 
   if (navEl && openBtn) {
     const backdrop = document.createElement("div");
@@ -215,89 +239,87 @@
     closeBtn && closeBtn.addEventListener("click", closeMenu);
     backdrop.addEventListener("click", closeMenu);
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
-    navEl.addEventListener("click", (e) => {
-      if (e.target.matches("a")) closeMenu();
-    });
+    navEl.addEventListener("click", (e) => { if (e.target.matches("a")) closeMenu(); });
   }
 
   /* ============================================================
-     6. Smooth scroll for hash links
+     6. Smooth scroll for in-page hash links
      ============================================================ */
   const headerOffset = () => (document.querySelector(".site-header")?.offsetHeight || 80) + 12;
-  document.querySelectorAll('a[href^="#"]').forEach((link) => {
-    link.addEventListener("click", (e) => {
-      const id = link.getAttribute("href").slice(1);
-      if (!id) return;
-      const target = document.getElementById(id);
-      if (!target) return;
-      e.preventDefault();
-      const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset();
-      window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
-
-      // if the link carries a data-cat, switch the products tab
-      const cat = link.getAttribute("data-cat");
-      if (cat) switchProductCategory(cat);
-    });
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute("href").slice(1);
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset();
+    window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
   });
 
   /* ============================================================
-     7. Header scroll state
+     7. Scroll-spy: active section dot
      ============================================================ */
-  const header = document.querySelector(".site-header");
-  let lastScroll = 0;
-  function onScrollHeader() {
-    const y = window.pageYOffset;
-    if (header) header.classList.toggle("is-scrolled", y > 12);
-    lastScroll = y;
-  }
-  window.addEventListener("scroll", onScrollHeader, { passive: true });
-  onScrollHeader();
-
-  /* ============================================================
-     8. Scroll-spy: active nav + section indicator
-     ============================================================ */
-  const sections = ["home","why","products","faq","contact"]
+  const sectionsToSpy = ["home","why","products","faq","contact"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
-  const navLinks = document.querySelectorAll("[data-nav-link]");
   const indicatorDots = document.querySelectorAll("[data-indicator-dot]");
   const indicatorNum = document.querySelector("[data-indicator-num]");
   const sectionNums = { home: "01", why: "02", products: "03", faq: "04", contact: "05" };
 
-  function setActiveSection(id) {
-    navLinks.forEach((a) => {
-      const href = a.getAttribute("href");
-      a.classList.toggle("is-active", href === "#" + id);
-    });
-    indicatorDots.forEach((d) => {
-      d.classList.toggle("is-active", d.getAttribute("data-target") === id);
-    });
-    if (indicatorNum && sectionNums[id]) indicatorNum.textContent = sectionNums[id];
-  }
-
-  if ("IntersectionObserver" in window && sections.length) {
+  if ("IntersectionObserver" in window && sectionsToSpy.length) {
     const observer = new IntersectionObserver((entries) => {
-      // find the entry with the largest intersection ratio that is intersecting
       let best = null;
       entries.forEach((e) => {
-        if (e.isIntersecting && (!best || e.intersectionRatio > best.intersectionRatio)) {
-          best = e;
-        }
+        if (e.isIntersecting && (!best || e.intersectionRatio > best.intersectionRatio)) best = e;
       });
-      if (best) setActiveSection(best.target.id);
+      if (best) {
+        const id = best.target.id;
+        indicatorDots.forEach((d) => d.classList.toggle("is-active", d.getAttribute("data-target") === id));
+        if (indicatorNum && sectionNums[id]) indicatorNum.textContent = sectionNums[id];
+      }
     }, {
       rootMargin: "-40% 0px -50% 0px",
       threshold: [0, .1, .25, .5, .75, 1]
     });
-    sections.forEach((s) => observer.observe(s));
+    sectionsToSpy.forEach((s) => observer.observe(s));
   }
 
   /* ============================================================
-     9. Product category tabs
+     8. Scroll reveal
+     ============================================================ */
+  if ("IntersectionObserver" in window) {
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-in");
+          revealObs.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -6% 0px", threshold: 0.05 });
+    document.querySelectorAll("[data-reveal]").forEach((el) => revealObs.observe(el));
+  } else {
+    document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("is-in"));
+  }
+
+  /* ============================================================
+     9. FAQ accordion (one open at a time)
+     ============================================================ */
+  const faqItems = document.querySelectorAll(".faq-item");
+  faqItems.forEach((item) => {
+    item.addEventListener("toggle", () => {
+      if (item.open) {
+        faqItems.forEach((other) => { if (other !== item && other.open) other.open = false; });
+      }
+    });
+  });
+
+  /* ============================================================
+    10. Product category tabs (home + products page)
      ============================================================ */
   const catTabs = document.querySelectorAll("[data-cat-tab]");
   const catPanels = document.querySelectorAll("[data-cat-panel]");
-
   function switchProductCategory(cat) {
     catTabs.forEach((t) => {
       const isActive = t.getAttribute("data-cat-tab") === cat;
@@ -308,7 +330,6 @@
       const isMatch = p.getAttribute("data-cat-panel") === cat;
       if (isMatch) {
         p.removeAttribute("hidden");
-        // re-trigger reveal for cards inside
         p.querySelectorAll("[data-reveal]").forEach((el) => {
           el.classList.remove("is-in");
           requestAnimationFrame(() => el.classList.add("is-in"));
@@ -318,39 +339,130 @@
       }
     });
   }
-  catTabs.forEach((t) => {
-    t.addEventListener("click", () => switchProductCategory(t.getAttribute("data-cat-tab")));
-  });
+  catTabs.forEach((t) => t.addEventListener("click", () => switchProductCategory(t.getAttribute("data-cat-tab"))));
 
   /* ============================================================
-    10. Scroll reveal
+    11. Add-to-cart buttons (delegated)
      ============================================================ */
-  if ("IntersectionObserver" in window) {
-    const revealObs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add("is-in");
-          revealObs.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
-    document.querySelectorAll("[data-reveal]").forEach((el) => revealObs.observe(el));
-  } else {
-    document.querySelectorAll("[data-reveal]").forEach((el) => el.classList.add("is-in"));
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-add-to-cart]");
+    if (!btn || !window.LR_CART) return;
+    e.preventDefault();
+    const id = btn.getAttribute("data-add-to-cart");
+    const qty = parseInt(btn.getAttribute("data-qty") || "1", 10);
+    window.LR_CART.add(id, qty);
+    flashButton(btn, "✓ تمت الإضافة");
+    openCartDrawer();
+  });
+
+  function flashButton(btn, text) {
+    const original = btn.innerHTML;
+    btn.classList.add("is-added");
+    btn.innerHTML = `<span>${text}</span>`;
+    setTimeout(() => {
+      btn.classList.remove("is-added");
+      btn.innerHTML = original;
+    }, 1400);
   }
 
   /* ============================================================
-    11. FAQ — accordion: open one at a time (optional polish)
+    12. Cart drawer + counter sync
      ============================================================ */
-  const faqItems = document.querySelectorAll(".faq-item");
-  faqItems.forEach((item) => {
-    item.addEventListener("toggle", () => {
-      if (item.open) {
-        faqItems.forEach((other) => {
-          if (other !== item && other.open) other.open = false;
-        });
-      }
+  function refreshCartUI() {
+    if (!window.LR_CART) return;
+    const items = window.LR_CART.get();
+    const count = window.LR_CART.count();
+    const total = window.LR_CART.total();
+
+    document.querySelectorAll("[data-cart-count]").forEach((el) => {
+      el.textContent = count;
+      el.classList.toggle("is-empty", count === 0);
     });
+    document.querySelectorAll("[data-cart-total]").forEach((el) => {
+      el.textContent = window.LR_DATA ? window.LR_DATA.formatPrice(total) : total;
+    });
+
+    const body = document.querySelector("[data-cart-body]");
+    if (body && window.LR_DATA) {
+      if (!items.length) {
+        body.innerHTML = `
+          <div class="cart-empty">
+            <div class="cart-empty__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 7h3l2 14a2 2 0 0 0 2 1.5h10a2 2 0 0 0 2-1.5l1.5-9H9"/><circle cx="13" cy="26" r="1.4" fill="currentColor"/><circle cx="22" cy="26" r="1.4" fill="currentColor"/></svg>
+            </div>
+            <p>سلتك فارغة حالياً.<br/>تصفّح المنتجات وأضف ما يناسبك.</p>
+            <a href="products.html" class="btn btn--primary btn--solid">تصفّح المنتجات</a>
+          </div>`;
+      } else {
+        body.innerHTML = items.map((it) => {
+          const p = window.LR_DATA.getProduct(it.id);
+          if (!p) return "";
+          return `
+            <div class="cart-line" data-cart-line="${p.id}">
+              <div class="cart-line__art product-art product-art--${p.art.kind}">
+                ${p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? 'game' : 'legend'}">${l}</span>`).join("")}
+              </div>
+              <div class="cart-line__body">
+                <div class="cart-line__cat">${(window.LR_DATA.getCategory(p.cat)||{}).name||""}</div>
+                <h4 class="cart-line__name">${p.name}</h4>
+                <div class="cart-line__qty">
+                  <button type="button" data-qty-dec aria-label="ناقص">−</button>
+                  <span data-qty>${it.qty}</span>
+                  <button type="button" data-qty-inc aria-label="زائد">+</button>
+                </div>
+              </div>
+              <div class="cart-line__price">
+                <div class="price">
+                  <span class="price__amount">${window.LR_DATA.formatPrice(p.price * it.qty)}</span>
+                  <span class="price__currency"><svg class="sar-icon"><use href="#sar-symbol"/></svg></span>
+                </div>
+                <button type="button" class="cart-line__remove" data-remove aria-label="حذف">حذف</button>
+              </div>
+            </div>`;
+        }).join("");
+      }
+    }
+  }
+
+  function openCartDrawer() {
+    const drawer = document.getElementById("cart-drawer");
+    if (!drawer) return;
+    drawer.classList.add("is-open");
+    drawer.setAttribute("aria-hidden", "false");
+    document.body.classList.add("is-drawer-open");
+  }
+  function closeCartDrawer() {
+    const drawer = document.getElementById("cart-drawer");
+    if (!drawer) return;
+    drawer.classList.remove("is-open");
+    drawer.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("is-drawer-open");
+  }
+
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-cart-toggle]")) { e.preventDefault(); openCartDrawer(); }
+    if (e.target.closest("[data-cart-close]"))  { closeCartDrawer(); }
   });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeCartDrawer(); });
+
+  // cart line qty controls (delegated, works on drawer & cart page)
+  document.addEventListener("click", (e) => {
+    const line = e.target.closest("[data-cart-line]");
+    if (!line || !window.LR_CART) return;
+    const id = line.getAttribute("data-cart-line");
+    if (e.target.closest("[data-qty-inc]")) {
+      const cur = window.LR_CART.get().find((x) => x.id === id);
+      if (cur) window.LR_CART.setQty(id, cur.qty + 1);
+    } else if (e.target.closest("[data-qty-dec]")) {
+      const cur = window.LR_CART.get().find((x) => x.id === id);
+      if (cur) window.LR_CART.setQty(id, Math.max(1, cur.qty - 1));
+    } else if (e.target.closest("[data-remove]")) {
+      window.LR_CART.remove(id);
+    }
+  });
+
+  window.addEventListener("cart:change", refreshCartUI);
+  // initial UI refresh (after partials inject)
+  setTimeout(refreshCartUI, 60);
 
 })();
