@@ -2101,15 +2101,15 @@ body.is-menu-open { overflow: hidden; }
 .nav-link.is-active::after {
   content: "";
   position: absolute;
-  left: 50% !important;
-  right: auto !important;
+  left: auto !important;
+  right: 50% !important;
   inset-inline-start: auto !important;
   inset-inline-end: auto !important;
   bottom: -10px;
   width: 28px;
   height: 2px;
   background: var(--blue);
-  transform: translateX(-50%) !important;
+  transform: translateX(50%) !important;
 }
 
 .product-detail__cta [data-add-to-cart] > svg {
