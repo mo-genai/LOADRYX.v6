@@ -410,7 +410,8 @@ html[dir="rtl"] .hero-fallback {
   position: absolute; inset: 0;
   z-index: 4;
   pointer-events: none;
-  opacity: .85;
+  opacity: .95;
+  mix-blend-mode: screen;
 }
 
 .hud { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
@@ -481,10 +482,8 @@ html[dir="rtl"] .hero-fallback {
   background: var(--blue);
 }
 
-/* lighter, tighter, transform-only proximity title */
+/* Proofcore-style variable proximity title */
 .hero-title {
-  --mx: 0;
-  --my: 0;
   margin: 0 0 24px;
   font-family: var(--font-arabic-display);
   line-height: 0.98;
@@ -498,14 +497,14 @@ html[dir="rtl"] .hero-fallback {
   margin: 0;
 }
 .hero-title__line--top {
-  font-weight: 500;
+  font-weight: 300;
   font-size: clamp(34px, 4.6vw, 64px);
   color: var(--text);
   opacity: .95;
   letter-spacing: -0.01em;
 }
 .hero-title__line--bot {
-  font-weight: 900;
+  font-weight: 300;
   font-size: clamp(42px, 5.8vw, 84px);
   color: var(--blue);
   margin-top: 2px;
@@ -515,20 +514,19 @@ html[dir="rtl"] .hero-fallback {
 .hero-title__line .prox-char + .prox-char { margin-inline-start: .38em; }
 
 .prox-char {
+  --wght: 300;
   display: inline-block;
-  /* transform-only animation — no layout reflow */
-  transform: translate3d(
-    calc(var(--mx, 0) * var(--wx, 6px)),
-    calc(var(--my, 0) * var(--wy, 4px)),
-    0
-  );
-  transition: transform 220ms var(--ease-out);
-  will-change: transform;
+  font-weight: var(--wght);
+  font-variation-settings: "wght" var(--wght);
+  transition:
+    font-weight 90ms linear,
+    font-variation-settings 90ms linear,
+    text-shadow 90ms linear;
+  will-change: font-weight, font-variation-settings;
 }
-/* alternate words shift in different directions (proofcore-style depth) */
-.hero-title__line .prox-char:nth-child(1) { --wx:  6px; --wy:  4px; }
-.hero-title__line .prox-char:nth-child(2) { --wx: -8px; --wy: -3px; }
-.hero-title__line .prox-char:nth-child(3) { --wx:  4px; --wy:  5px; }
+.prox-char:hover {
+  text-shadow: 0 0 22px rgba(3,131,244,.28);
+}
 
 .hero-subtitle {
   margin: 0 0 32px;
