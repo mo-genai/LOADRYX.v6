@@ -2099,10 +2099,16 @@ body.is-menu-open { overflow: hidden; }
 }
 
 .nav-link.is-active::after {
-  left: 50%;
-  right: auto;
-  inset-inline-start: auto;
-  inset-inline-end: auto;
+  content: "";
+  position: absolute;
+  left: 50% !important;
+  right: auto !important;
+  inset-inline-start: auto !important;
+  inset-inline-end: auto !important;
+  bottom: -10px;
+  width: 28px;
+  height: 2px;
+  background: var(--blue);
   transform: translateX(-50%) !important;
 }
 
