@@ -2118,3 +2118,17 @@ body.is-menu-open { overflow: hidden; }
   transform: none !important;
   pointer-events: none;
 }
+.product-detail__cta [data-add-to-cart] > svg {
+  display: none !important;
+}
+
+.product-detail:has(.product-art--ultimate) .product-detail__trust-item:nth-child(2),
+.product-detail:has(.product-art--game) .product-detail__trust-item:nth-child(2),
+.product-detail:has(.product-art--setting) .product-detail__trust-item:nth-child(2),
+.product-detail:has(.product-art--script) .product-detail__trust-item:nth-child(2) {
+  display: none !important;
+}
+
+.product-detail:has(.product-art--accessory) .product-detail__trust-item:nth-child(n + 2) {
+  display: none !important;
+}
