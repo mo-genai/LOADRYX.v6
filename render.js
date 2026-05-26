@@ -183,7 +183,7 @@
               <button type="button" data-stepper-inc aria-label="زائد">+</button>
             </div>
             <button class="btn btn--primary btn--solid btn--full" type="button" data-add-to-cart="${p.id}" data-qty="1">
-              ${SVG.cart}<span>أضف للسلة</span>
+                <span>أضف للسلة</span>
             </button>
             <a href="https://wa.me/966573534407?text=${encodeURIComponent("استفسار عن: " + p.name)}" target="_blank" rel="noopener" class="btn btn--whats product-detail__whats" style="height:50px;">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.03 3 3 7.03 3 12c0 1.58.42 3.07 1.14 4.36L3 21l4.78-1.12A8.96 8.96 0 0 0 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
