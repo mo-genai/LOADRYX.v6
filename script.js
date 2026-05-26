@@ -24,99 +24,126 @@
     heroVideo.addEventListener("stalled", () => { if (heroVideo.readyState < 2) fail(); });
     const p = heroVideo.play();
     if (p && typeof p.catch === "function") p.catch(() => {});
+
+    // يمنع خراب تموضع الفيديو عند فتح/إغلاق DevTools أو تغيير حجم النافذة
+    let mediaResizeTimer = 0;
+    const repaintHeroVideo = () => {
+      clearTimeout(mediaResizeTimer);
+      mediaResizeTimer = setTimeout(() => {
+        videoMedia.style.transform = "translateZ(0)";
+        heroVideo.style.transform = getComputedStyle(heroVideo).transform;
+        requestAnimationFrame(() => {
+          videoMedia.style.transform = "";
+          heroVideo.style.transform = "";
+          if (heroVideo.paused) {
+            const play = heroVideo.play();
+            if (play && typeof play.catch === "function") play.catch(() => {});
+          }
+        });
+      }, 140);
+    };
+    window.addEventListener("resize", repaintHeroVideo, { passive: true });
+    window.addEventListener("orientationchange", repaintHeroVideo, { passive: true });
   }
 
   /* ============================================================
-     2. Canvas particles — Proofcore-style
-     - dense white micro particles
-     - transparent canvas over hero
-     - click pushes 4 particles
-     - retina support + pause on hidden tab
+     2. Canvas particles — proofcore-inspired (sparse + soft)
+     - small particles, soft blue
+     - optional thin connection lines for very close pairs
+     - light mouse parallax
+     - rAF capped to 60fps, paused on visibility hidden
      ============================================================ */
   const canvas = document.getElementById("hero-particles");
   if (canvas && !reducedMotion) {
     const ctx = canvas.getContext("2d", { alpha: true });
     let w = 0, h = 0, dpr = 1;
     let particles = [];
+    let mx = -9999, my = -9999;
     let rafId = 0;
     let running = true;
     let lastT = 0;
 
-    const PARTICLE_COLOR = "255, 255, 255";
-
-    function random(min, max) {
-      return min + Math.random() * (max - min);
-    }
-
-    function makeParticle(x = Math.random() * w, y = Math.random() * h) {
-      const speed = random(0.10, 1.00);
-      const angle = Math.random() * Math.PI * 2;
-
-      return {
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        r: random(0.40, 1.00),
-        a: random(0.10, 1.00),
-        pulse: Math.random() * Math.PI * 2
-      };
-    }
+    const BASE_COLOR = "3, 131, 244";   // matches --blue
+    const TARGET_DENSITY = 1 / 22000;   // particles per px²
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = rect.width || window.innerWidth;
-      h = rect.height || window.innerHeight;
-
+      w = rect.width;
+      h = rect.height;
       canvas.width  = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
       build();
     }
 
     function build() {
-      // قريب من إحساس Proofcore: كثافة عالية، لكن محدودة عشان ما يثقل المتجر
-      const count = Math.max(260, Math.min(1200, Math.round((w * h) / 950)));
+      const count = Math.max(18, Math.min(Math.round(w * h * TARGET_DENSITY), 56));
       particles = new Array(count);
-
       for (let i = 0; i < count; i++) {
-        particles[i] = makeParticle();
+        particles[i] = {
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.10,
+          vy: (Math.random() - 0.5) * 0.10,
+          r: Math.random() * 0.9 + 0.5,
+          a: Math.random() * 0.28 + 0.10,
+        };
       }
     }
 
     function step(t) {
       if (!running) { rafId = 0; return; }
-
-      // cap around 60fps
-      if (t - lastT < 14) {
-        rafId = requestAnimationFrame(step);
-        return;
-      }
+      // throttle to ~60fps
+      const dt = t - lastT;
+      if (dt < 14) { rafId = requestAnimationFrame(step); return; }
       lastT = t;
 
       ctx.clearRect(0, 0, w, h);
 
+      // draw connection lines first (under dots)
+      const CONN_MAX = 110;
+      const CONN_MAX_SQ = CONN_MAX * CONN_MAX;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < particles.length; i++) {
+        const a = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < CONN_MAX_SQ) {
+            const k = 1 - d2 / CONN_MAX_SQ;
+            ctx.strokeStyle = `rgba(${BASE_COLOR}, ${(k * 0.07).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // update + draw dots
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
-
         p.x += p.vx;
         p.y += p.vy;
-        p.pulse += 0.035;
-
-        // Proofcore-style out mode: إذا طلعت من الشاشة ترجع من الجهة الثانية
-        if (p.x < -8) p.x = w + 8;
-        else if (p.x > w + 8) p.x = -8;
-
-        if (p.y < -8) p.y = h + 8;
-        else if (p.y > h + 8) p.y = -8;
-
-        const alpha = Math.max(0.05, Math.min(1, p.a * (0.65 + Math.sin(p.pulse) * 0.35)));
+        // soft mouse repulsion
+        const dx = p.x - mx, dy = p.y - my;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 9000) {
+          const f = (9000 - d2) / 9000 * 0.45;
+          const inv = 1 / Math.sqrt(d2 + 0.01);
+          p.x += dx * inv * f;
+          p.y += dy * inv * f;
+        }
+        // wrap
+        if (p.x < -4) p.x = w + 4; else if (p.x > w + 4) p.x = -4;
+        if (p.y < -4) p.y = h + 4; else if (p.y > h + 4) p.y = -4;
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${PARTICLE_COLOR}, ${alpha.toFixed(3)})`;
+        ctx.fillStyle = `rgba(${BASE_COLOR}, ${p.a.toFixed(3)})`;
         ctx.fill();
       }
 
@@ -129,26 +156,24 @@
       lastT = 0;
       rafId = requestAnimationFrame(step);
     }
-
     function stop() {
       running = false;
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = 0;
-      }
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     }
 
-    window.addEventListener("resize", resize, { passive: true });
-
-    // نفس فكرة Proofcore: click mode push quantity 4
-    window.addEventListener("click", (e) => {
-      if (!canvas.closest(".hero")) return;
+    let canvasResizeTimer = 0;
+    const scheduleCanvasResize = () => {
+      clearTimeout(canvasResizeTimer);
+      canvasResizeTimer = setTimeout(resize, 120);
+    };
+    window.addEventListener("resize", scheduleCanvasResize, { passive: true });
+    window.addEventListener("orientationchange", scheduleCanvasResize, { passive: true });
+    window.addEventListener("pointermove", (e) => {
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      for (let i = 0; i < 4; i++) particles.push(makeParticle(x, y));
+      mx = e.clientX - rect.left;
+      my = e.clientY - rect.top;
     }, { passive: true });
-
+    window.addEventListener("pointerleave", () => { mx = my = -9999; });
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stop(); else start();
     });
@@ -158,60 +183,49 @@
   }
 
   /* ============================================================
-     3. Hero proximity headline — Proofcore-style variable weight
-     - mouse distance controls each title word weight
-     - from 300 to 900
-     - radius close to Proofcore behavior
+     3. Hero proximity headline — transform-only, no reflow
+     - reads pointer once per rAF
+     - writes two CSS variables (--mx, --my) on the title
+     - each word uses transform: translate3d(calc(...), calc(...), 0)
+     - zero font-weight or letter-spacing animation (no reflow)
      ============================================================ */
   const title = document.querySelector("[data-proximity-target]");
   if (title && !reducedMotion && !isCoarse) {
-    const items = [...title.querySelectorAll(".prox-char")];
-    let pointer = { x: -9999, y: -9999 };
+    let pmx = 0, pmy = 0;          // pointer relative to title (-1..1)
+    let cur = { x: 0, y: 0 };      // smoothed
     let raf = 0;
+    let active = false;
+    const SMOOTH = 0.12;           // easing toward target
 
-    const FROM = 300;
-    const TO = 900;
-    const RADIUS = 125;
-
-    function clamp(v, min, max) {
-      return Math.max(min, Math.min(max, v));
+    function onMove(e) {
+      const r = title.getBoundingClientRect();
+      const px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+      const py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+      pmx = Math.max(-1.4, Math.min(1.4, px));
+      pmy = Math.max(-1.4, Math.min(1.4, py));
+      if (!active) { active = true; raf = requestAnimationFrame(loop); }
     }
 
-    function update() {
-      raf = 0;
+    function onLeave() {
+      pmx = 0; pmy = 0;
+    }
 
-      for (const el of items) {
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const distance = Math.hypot(pointer.x - cx, pointer.y - cy);
-
-        const influence = clamp(1 - distance / RADIUS, 0, 1);
-        const weight = Math.round(FROM + (TO - FROM) * influence);
-
-        el.style.setProperty("--wght", weight);
-        el.style.fontWeight = String(weight);
-        el.style.fontVariationSettings = `"wght" ${weight}`;
+    function loop() {
+      cur.x += (pmx - cur.x) * SMOOTH;
+      cur.y += (pmy - cur.y) * SMOOTH;
+      title.style.setProperty("--mx", cur.x.toFixed(3));
+      title.style.setProperty("--my", cur.y.toFixed(3));
+      if (Math.abs(cur.x - pmx) > 0.001 || Math.abs(cur.y - pmy) > 0.001 || pmx !== 0 || pmy !== 0) {
+        raf = requestAnimationFrame(loop);
+      } else {
+        active = false;
+        title.style.setProperty("--mx", 0);
+        title.style.setProperty("--my", 0);
       }
     }
 
-    function requestUpdate() {
-      if (!raf) raf = requestAnimationFrame(update);
-    }
-
-    window.addEventListener("pointermove", (e) => {
-      pointer.x = e.clientX;
-      pointer.y = e.clientY;
-      requestUpdate();
-    }, { passive: true });
-
-    window.addEventListener("pointerleave", () => {
-      pointer.x = -9999;
-      pointer.y = -9999;
-      requestUpdate();
-    }, { passive: true });
-
-    update();
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerleave", onLeave, { passive: true });
   }
 
   /* ============================================================
