@@ -1,1 +1,893 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02070D" />
+  <title>LOADRYX — مُصمَّم للاستجابة، مبني للانتصار</title>
+  <meta name="description" content="LOADRYX — سكربتات وأدوات ذكاء اصطناعي لأشهر ألعاب الشوتر التنافسية. تحسين الإيم، تثبيت الارتداد، وسرعة الاستجابة." />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
+
+  <link rel="preload" as="image" href="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779661749/X2_pw7s8m.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
+
+  <!-- ========================================================
+       HEADER
+  ========================================================= -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="#home" class="brand" aria-label="LOADRYX">
+        <img
+          src="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779614344/LOADRYX_logo_transparent_4x_f01fwd.png"
+          alt="LOADRYX"
+          class="brand-logo"
+          width="420"
+          height="80"
+        />
+      </a>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="القائمة الرئيسية">
+        <button class="nav-close" type="button" aria-label="إغلاق القائمة" data-menu-close>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+        </button>
+        <ul>
+          <li><a href="#home"          class="nav-link is-active" data-nav-link>الرئيسية</a></li>
+          <li><a href="#why"           class="nav-link" data-nav-link>لماذا LOADRYX</a></li>
+          <li><a href="#products"      class="nav-link" data-nav-link>المنتجات</a></li>
+          <li><a href="#products"      class="nav-link" data-nav-link data-cat="accessories">الملحقات</a></li>
+          <li><a href="#faq"           class="nav-link" data-nav-link>الأسئلة الشائعة</a></li>
+          <li><a href="#contact"       class="nav-link" data-nav-link>تواصل معنا</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="#cart" class="icon-btn" aria-label="السلة">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2.2l2 11.2A2 2 0 0 0 10.2 18h7.6a2 2 0 0 0 2-1.7l1.3-7.3H7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter"/><circle cx="10" cy="21" r="1.2" fill="currentColor"/><circle cx="18" cy="21" r="1.2" fill="currentColor"/></svg>
+          <span class="cart-count" data-cart-count>0</span>
+        </a>
+        <a href="#account" class="icon-btn icon-btn--account" aria-label="حسابي">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 20c0-3.6 3.4-6.5 7.5-6.5s7.5 2.9 7.5 6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>
+        </a>
+        <a href="#account" class="btn btn--launch" role="button">
+          <span>دخول المتجر</span>
+          <svg class="btn-arrow btn-arrow--rtl" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"/>
+          </svg>
+        </a>
+        <button class="menu-toggle" type="button" aria-label="فتح القائمة" data-menu-open>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       SECTION INDICATOR
+  ========================================================= -->
+  <aside class="section-indicator" aria-hidden="true">
+    <span class="section-indicator__num" data-indicator-num>01</span>
+    <span class="section-indicator__line section-indicator__line--top"></span>
+    <ul class="section-indicator__dots">
+      <li><span class="dot is-active" data-indicator-dot data-target="home"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="why"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="products"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="faq"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="contact"></span></li>
+    </ul>
+    <span class="section-indicator__line section-indicator__line--bot"></span>
+    <span class="section-indicator__brand">LR</span>
+  </aside>
+
+  <main id="main">
+
+    <!-- ========================================================
+         HERO  (translated to Arabic, same cinematic chassis)
+    ========================================================= -->
+    <section class="hero" id="home" aria-label="الرئيسية">
+
+      <div class="hero-media" aria-hidden="true">
+        <video
+          class="hero-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779661749/X2_pw7s8m.png"
+        >
+          <source src="https://res.cloudinary.com/dmp1fo2j4/video/upload/v1779660274/X_4K_szqe2e.mp4" type="video/mp4" />
+        </video>
+        <img
+          class="hero-fallback"
+          src="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779661749/X2_pw7s8m.png"
+          alt=""
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+
+      <div class="hero-overlay hero-overlay--vignette" aria-hidden="true"></div>
+      <div class="hero-overlay hero-overlay--leftfade" aria-hidden="true"></div>
+      <div class="hero-overlay hero-overlay--bottomfade" aria-hidden="true"></div>
+      <div class="hero-overlay hero-overlay--diagonal" aria-hidden="true"></div>
+
+      <div class="lr-outline" aria-hidden="true">
+        <svg viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet">
+          <text x="50%" y="62%" text-anchor="middle" class="lr-outline-text">LR</text>
+        </svg>
+      </div>
+
+      <canvas id="hero-particles" class="hero-particles" aria-hidden="true"></canvas>
+
+      <div class="hud" aria-hidden="true">
+        <div class="hud-corner hud-corner--tl"></div>
+        <div class="hud-corner hud-corner--tr"></div>
+        <div class="hud-corner hud-corner--bl"></div>
+        <div class="hud-corner hud-corner--br"></div>
+
+        <div class="hud-rail hud-rail--left">
+          <span class="hud-dot"></span><span class="hud-dot"></span><span class="hud-dot"></span>
+          <span class="hud-dot is-on"></span><span class="hud-dot"></span><span class="hud-dot"></span>
+          <span class="hud-dot"></span><span class="hud-dot"></span><span class="hud-dot"></span>
+          <span class="hud-dot"></span>
+        </div>
+
+        <div class="hud-rail hud-rail--right">
+          <span class="hud-tick"></span><span class="hud-tick hud-tick--lg"></span><span class="hud-tick"></span>
+          <span class="hud-tick"></span><span class="hud-tick hud-tick--lg"></span><span class="hud-tick"></span>
+          <span class="hud-tick"></span><span class="hud-tick hud-tick--lg"></span><span class="hud-tick"></span>
+        </div>
+
+        <div class="hud-dots hud-dots--bl"></div>
+        <div class="hud-frame hud-frame--br"></div>
+        <div class="hud-line hud-line--mid"></div>
+      </div>
+
+      <div class="hero-content">
+        <h1 class="hero-title" data-proximity-target>
+          <span class="hero-title__line hero-title__line--top" data-proximity-line>
+            <span class="prox-char">مُصمَّم</span>
+            <span class="prox-char">للاستجابة</span>
+          </span>
+          <span class="hero-title__line hero-title__line--bot" data-proximity-line>
+            <span class="prox-char">مبني</span>
+            <span class="prox-char">للانتصار</span>
+          </span>
+        </h1>
+
+        <p class="hero-subtitle">
+          سكربتات وأدوات ذكاء اصطناعي خاصة لأشهر ألعاب الشوتر التنافسية،<br />
+          مصممة لتحسين الإيم، تثبيت الارتداد، وتسريع الاستجابة<br />
+          في اللحظة التي تكون فيها الثانية كافية للحسم.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#products" class="btn btn--primary">
+            <span>تصفّح المنتجات</span>
+            <svg class="btn-arrow btn-arrow--rtl" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"/>
+            </svg>
+          </a>
+          <a href="#why" class="btn btn--ghost">
+            <span>اعرف أكثر</span>
+            <svg class="btn-arrow btn-arrow--rtl btn-arrow--small" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- bottom feature bar -->
+      <div class="feature-bar" role="list" aria-label="الركائز الأساسية">
+        <div class="feature-col" role="listitem">
+          <div class="feature-icon">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+              <circle cx="16" cy="16" r="9" /><circle cx="16" cy="16" r="2.4" />
+              <path d="M16 3v5M16 24v5M3 16h5M24 16h5" />
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3 class="feature-title">دقة</h3>
+            <p class="feature-desc">مبني للدقة<br />في كل التفاصيل.</p>
+          </div>
+        </div>
+        <div class="feature-divider"></div>
+
+        <div class="feature-col" role="listitem">
+          <div class="feature-icon">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+              <path d="M18 3 7 18h7l-2 11 11-15h-7l2-11z" />
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3 class="feature-title">أداء</h3>
+            <p class="feature-desc">مُحسَّن للسرعة<br />والثبات.</p>
+          </div>
+        </div>
+        <div class="feature-divider"></div>
+
+        <div class="feature-col" role="listitem">
+          <div class="feature-icon">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+              <path d="M16 3 5 7v9c0 7 5 11.5 11 13 6-1.5 11-6 11-13V7l-11-4z" />
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3 class="feature-title">موثوقية</h3>
+            <p class="feature-desc">مهندَس لنتائج<br />ثابتة ومتسقة.</p>
+          </div>
+        </div>
+        <div class="feature-divider"></div>
+
+        <div class="feature-col" role="listitem">
+          <div class="feature-icon">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+              <circle cx="11" cy="12" r="3.5"/><circle cx="21" cy="12" r="3.5"/>
+              <path d="M5 24c0-3.4 2.7-6 6-6s6 2.6 6 6"/><path d="M15 24c0-3.4 2.7-6 6-6s6 2.6 6 6"/>
+            </svg>
+          </div>
+          <div class="feature-text">
+            <h3 class="feature-title">مجتمع</h3>
+            <p class="feature-desc">يجمعنا التركيز.<br />يقودنا الفوز.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         WHY LOADRYX
+    ========================================================= -->
+    <section class="section section--why" id="why" aria-labelledby="why-heading">
+      <div class="section-inner">
+        <header class="section-head">
+          <span class="eyebrow"><span class="eyebrow__num">02</span><span class="eyebrow__bar"></span>لماذا LOADRYX</span>
+          <h2 class="section-title" id="why-heading">
+            تجربة لاعب، <span class="text-blue">لا تجربة منتج.</span>
+          </h2>
+          <p class="section-sub">
+            كل تفصيلة في LOADRYX مصممة لتمنحك الأفضلية داخل اللعبة — من الإعداد الأول وحتى آخر اشتباك.
+          </p>
+        </header>
+
+        <div class="why-grid">
+          <article class="why-card" data-reveal>
+            <div class="why-card__corner why-card__corner--tl"></div>
+            <div class="why-card__corner why-card__corner--br"></div>
+            <span class="why-card__index">01</span>
+            <div class="why-card__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <path d="M4 22 12 14l5 5 11-11" /><path d="M28 8h-6V2"/>
+              </svg>
+            </div>
+            <h3 class="why-card__title">أداء احترافي داخل القيم</h3>
+            <p class="why-card__desc">تجربة أكثر سلاسة وثباتاً تساعدك على اللعب براحة وتحكّم أفضل في كل اشتباك.</p>
+          </article>
+
+          <article class="why-card" data-reveal>
+            <div class="why-card__corner why-card__corner--tl"></div>
+            <div class="why-card__corner why-card__corner--br"></div>
+            <span class="why-card__index">02</span>
+            <div class="why-card__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <path d="M27 16a11 11 0 1 1-3.2-7.8"/><path d="M27 5v6h-6"/>
+              </svg>
+            </div>
+            <h3 class="why-card__title">دعم فني سريع</h3>
+            <p class="why-card__desc">فريق متفرغ للرد على استفساراتك ومساعدتك في وقتها — بدون قوائم انتظار طويلة.</p>
+          </article>
+
+          <article class="why-card" data-reveal>
+            <div class="why-card__corner why-card__corner--tl"></div>
+            <div class="why-card__corner why-card__corner--br"></div>
+            <span class="why-card__index">03</span>
+            <div class="why-card__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <path d="M6 8h20v4H6zM6 20h20v4H6z"/><path d="M10 14v4M22 14v4"/>
+              </svg>
+            </div>
+            <h3 class="why-card__title">تحديثات مستمرة</h3>
+            <p class="why-card__desc">تطوير دائم للسكربتات والإعدادات لضمان أفضل أداء مع كل تحديث جديد للعبة.</p>
+          </article>
+
+          <article class="why-card" data-reveal>
+            <div class="why-card__corner why-card__corner--tl"></div>
+            <div class="why-card__corner why-card__corner--br"></div>
+            <span class="why-card__index">04</span>
+            <div class="why-card__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <path d="M16 3 5 7v9c0 7 5 11.5 11 13 6-1.5 11-6 11-13V7l-11-4z" />
+                <path d="M11 16l3.5 3.5L22 12"/>
+              </svg>
+            </div>
+            <h3 class="why-card__title">أمان وخصوصية</h3>
+            <p class="why-card__desc">حماية كاملة لبياناتك. لا تثبيت على الكونسول، لا تعديل على ملفات اللعبة، صفر تدخل مباشر.</p>
+          </article>
+
+          <article class="why-card" data-reveal>
+            <div class="why-card__corner why-card__corner--tl"></div>
+            <div class="why-card__corner why-card__corner--br"></div>
+            <span class="why-card__index">05</span>
+            <div class="why-card__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <path d="M18 3 7 18h7l-2 11 11-15h-7l2-11z" />
+              </svg>
+            </div>
+            <h3 class="why-card__title">تفعيل سريع وسهل</h3>
+            <p class="why-card__desc">إعداد مباشر وتشغيل خلال دقائق — بدون خطوات معقدة أو تعليمات لا تنتهي.</p>
+          </article>
+
+          <article class="why-card" data-reveal>
+            <div class="why-card__corner why-card__corner--tl"></div>
+            <div class="why-card__corner why-card__corner--br"></div>
+            <span class="why-card__index">06</span>
+            <div class="why-card__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <path d="M6 12h20v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M11 12V8a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h3 class="why-card__title">ضمان على الخدمة</h3>
+            <p class="why-card__desc">متابعة كاملة بعد التركيب وضمان تقديم الخدمة بالشكل المطلوب — بدون استثناء.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         PRODUCTS
+    ========================================================= -->
+    <section class="section section--products" id="products" aria-labelledby="products-heading">
+      <div class="section-inner">
+        <header class="section-head section-head--row">
+          <div>
+            <span class="eyebrow"><span class="eyebrow__num">03</span><span class="eyebrow__bar"></span>المتجر</span>
+            <h2 class="section-title" id="products-heading">
+              المنتجات <span class="text-blue">والباكجات.</span>
+            </h2>
+          </div>
+          <p class="section-sub section-sub--inline">
+            اختر الفئة المناسبة لك — من باكجات الذكاء الاصطناعي للـ PS5،<br />إلى السكربتات الاحترافية والملحقات.
+          </p>
+        </header>
+
+        <nav class="cat-tabs" role="tablist" aria-label="فئات المنتجات">
+          <button class="cat-tab is-active" role="tab" aria-selected="true" data-cat-tab="ps5">
+            <span class="cat-tab__name">PS5 AI</span>
+            <span class="cat-tab__count">7 منتجات</span>
+          </button>
+          <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="setting">
+            <span class="cat-tab__name">Setting AI</span>
+            <span class="cat-tab__count">منتجان</span>
+          </button>
+          <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="script">
+            <span class="cat-tab__name">Script Xim Matrix</span>
+            <span class="cat-tab__count">منتجان</span>
+          </button>
+          <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="accessories">
+            <span class="cat-tab__name">الملحقات</span>
+            <span class="cat-tab__count">3 منتجات</span>
+          </button>
+          <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="games">
+            <span class="cat-tab__name">الألعاب</span>
+            <span class="cat-tab__count">قريباً</span>
+          </button>
+        </nav>
+
+        <!-- PS5 AI -->
+        <div class="products-grid" data-cat-panel="ps5">
+          <!-- featured large card -->
+          <article class="product-card product-card--featured" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-ultimate">
+              <div class="product-card__media">
+                <span class="badge badge--featured">الباكج الكامل</span>
+                <div class="product-art product-art--ultimate">
+                  <span class="product-art__title">PS5 AI</span>
+                  <span class="product-art__sub">ULTIMATE EDITION</span>
+                </div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI AIM Package — Ultimate Edition</h3>
+                <p class="product-card__desc">7 ألعاب كاملة، إعداد احترافي، ودعم متواصل. أعلى تجربة AI Aim للـ PS5.</p>
+                <div class="product-card__foot">
+                  <div class="price">
+                    <span class="price__amount">10,500</span>
+                    <span class="price__currency" aria-label="ريال سعودي">
+                      <svg class="sar-icon" viewBox="0 0 24 28" aria-hidden="true"><use href="#sar-symbol"/></svg>
+                    </span>
+                  </div>
+                  <span class="product-card__cta">
+                    عرض التفاصيل
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-apex">
+              <div class="product-card__media">
+                <div class="product-art" data-game="apex"><span class="product-art__game">APEX</span><span class="product-art__legend">LEGENDS</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI — Apex Legends</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">1,426</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-cod">
+              <div class="product-card__media">
+                <div class="product-art" data-game="cod"><span class="product-art__game">CALL</span><span class="product-art__legend">OF DUTY</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI — Call of Duty</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">1,426</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-valorant">
+              <div class="product-card__media">
+                <div class="product-art" data-game="valorant"><span class="product-art__game">VALORANT</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI — Valorant</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">1,426</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-overwatch">
+              <div class="product-card__media">
+                <div class="product-art" data-game="overwatch"><span class="product-art__game">OVER</span><span class="product-art__legend">WATCH</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI — Overwatch</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">1,426</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-fortnite">
+              <div class="product-card__media">
+                <div class="product-art" data-game="fortnite"><span class="product-art__game">FORT</span><span class="product-art__legend">NITE</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI — Fortnite</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">1,500</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/ps5-ai-arc">
+              <div class="product-card__media">
+                <div class="product-art" data-game="arc"><span class="product-art__game">ARC</span><span class="product-art__legend">RAIDERS</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">PS5 AI</div>
+                <h3 class="product-card__name">PS5 AI — ARC Raiders</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">1,426</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+        </div>
+
+        <!-- Setting AI -->
+        <div class="products-grid" data-cat-panel="setting" hidden>
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/setting-ai-full">
+              <div class="product-card__media">
+                <div class="product-art product-art--setting"><span class="product-art__game">SETTING</span><span class="product-art__legend">AI</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">Setting AI</div>
+                <h3 class="product-card__name">Setting AI — ضبط كامل للعبة</h3>
+                <p class="product-card__desc">إعداد كامل من البداية للنهاية وضبط الإعدادات الاحترافية للحساسية والـ Aim.</p>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">563</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/setting-ai-support">
+              <div class="product-card__media">
+                <div class="product-art product-art--setting"><span class="product-art__game">دعم</span><span class="product-art__legend">فني</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">Setting AI</div>
+                <h3 class="product-card__name">دعم فني — جلسة متابعة</h3>
+                <p class="product-card__desc">جلسة دعم فني مخصصة لمراجعة الأداء وتعديل الإعدادات.</p>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">534</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+        </div>
+
+        <!-- Script Xim Matrix -->
+        <div class="products-grid" data-cat-panel="script" hidden>
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/script-warzone">
+              <div class="product-card__media">
+                <div class="product-art product-art--script"><span class="product-art__game">SCRIPT</span><span class="product-art__legend">WARZONE</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">Script • Xim Matrix</div>
+                <h3 class="product-card__name">سكربت Warzone الاحترافي</h3>
+                <p class="product-card__desc">Aim Assist متطور، ثبات عالٍ، إعدادات احترافية متوافقة مع جميع المنصات.</p>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">200</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/script-bo7-dma">
+              <div class="product-card__media">
+                <div class="product-art product-art--script"><span class="product-art__game">BLACK OPS 7</span><span class="product-art__legend">DMA</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">Script • Xim Matrix</div>
+                <h3 class="product-card__name">سكربت Black Ops 7 — DMA</h3>
+                <p class="product-card__desc">قراءة بيانات لعبة متقدمة عبر الـ DMA لتجربة احترافية متكاملة.</p>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">150</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+        </div>
+
+        <!-- Accessories -->
+        <div class="products-grid" data-cat-panel="accessories" hidden>
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/titan-two">
+              <div class="product-card__media">
+                <span class="badge badge--reserve">حجز مسبق</span>
+                <div class="product-art product-art--accessory"><span class="product-art__game">TITAN</span><span class="product-art__legend">TWO</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">الملحقات</div>
+                <h3 class="product-card__name">جهاز Titan Two — حجز مسبق</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">850</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/brook-wingman">
+              <div class="product-card__media">
+                <div class="product-art product-art--accessory"><span class="product-art__game">BROOK</span><span class="product-art__legend">WINGMAN FGC2</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">الملحقات</div>
+                <h3 class="product-card__name">محول Brook Wingman FGC2</h3>
+                <p class="product-card__desc">محول عصا تحكم Arcade لدعم PS5 والكمبيوتر الشخصي.</p>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">290.50</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+
+          <article class="product-card" data-reveal>
+            <a class="product-card__link" href="#product/p5-general">
+              <div class="product-card__media">
+                <div class="product-art product-art--accessory"><span class="product-art__game">P5</span><span class="product-art__legend">GENERAL</span></div>
+              </div>
+              <div class="product-card__body">
+                <div class="product-card__cat">الملحقات</div>
+                <h3 class="product-card__name">P5 General</h3>
+                <div class="product-card__foot">
+                  <div class="price"><span class="price__amount">157.53</span><span class="price__currency"><svg class="sar-icon" viewBox="0 0 24 28"><use href="#sar-symbol"/></svg></span></div>
+                  <span class="product-card__cta">التفاصيل <svg viewBox="0 0 24 24"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                </div>
+              </div>
+            </a>
+          </article>
+        </div>
+
+        <!-- Games (empty) -->
+        <div class="products-grid products-grid--empty" data-cat-panel="games" hidden>
+          <div class="empty-state">
+            <div class="empty-state__icon">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square" aria-hidden="true">
+                <rect x="3" y="9" width="26" height="14" rx="6"/>
+                <path d="M10 16h4M12 14v4M21 14v.01M24 17v.01"/>
+              </svg>
+            </div>
+            <h3 class="empty-state__title">قسم الألعاب — قريباً</h3>
+            <p class="empty-state__desc">نعمل على إضافة منتجات هذا القسم. تابعنا للحصول على آخر التحديثات.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         FAQ
+    ========================================================= -->
+    <section class="section section--faq" id="faq" aria-labelledby="faq-heading">
+      <div class="section-inner section-inner--narrow">
+        <header class="section-head">
+          <span class="eyebrow"><span class="eyebrow__num">04</span><span class="eyebrow__bar"></span>الأسئلة الشائعة</span>
+          <h2 class="section-title" id="faq-heading">
+            إجابات سريعة، <span class="text-blue">بدون التفاف.</span>
+          </h2>
+          <p class="section-sub">كل ما تحتاج معرفته قبل البدء — وإن لم تجد إجابتك، فريق الدعم متاح على واتساب.</p>
+        </header>
+
+        <div class="faq" role="list">
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>هل البرنامج آمن؟ هل يمكن أن يأخذ بان أو يطير الأكاونت؟</span>
+              <span class="faq-item__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p>البرنامج آمن بنسبة 100% ولا يشكّل أي خطر على الحساب أو الجهاز. السبب: البرنامج لا يعمل داخل الكونسول ولا يتدخّل في اللعبة بشكل مباشر — هو يعمل فقط على الـ PC مستخدماً الذكاء الاصطناعي لتحليل الصورة القادمة من كرت الكابتشر (Capture Card).</p>
+              <ul class="faq-item__bullets">
+                <li>لا يتم تثبيت أي ملفات على الجهاز.</li>
+                <li>لا يوجد تعديل على اللعبة أو النظام.</li>
+                <li>لا توجد طريقة للعبة لاكتشاف استخدامه من الأساس.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>هل التوصيل متاح لجميع المدن؟</span>
+              <span class="faq-item__icon"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p>نعم — نوصل لجميع مدن المملكة. بعد تأكيد الطلب يتم تجهيز الشحنة خلال 24 ساعة عمل.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>كيف أتتبّع طلبي؟</span>
+              <span class="faq-item__icon"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p>بعد تأكيد الطلب ستصلك رسالة نصية وبريد إلكتروني يحتويان على رقم التتبّع، يمكنك استخدامه لمتابعة الطلب عبر موقعنا أو موقع شركة الشحن.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>ما هي طرق الدفع المتاحة؟</span>
+              <span class="faq-item__icon"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p>نقبل جميع طرق الدفع الرئيسية: مدى، فيزا، ماستركارد، Apple Pay، STC Pay، إضافةً إلى التقسيط عبر <strong>تابي</strong> و<strong>تمارا</strong>.</p>
+              <div class="pay-row">
+                <span class="pay-chip">مدى</span>
+                <span class="pay-chip">VISA</span>
+                <span class="pay-chip">Mastercard</span>
+                <span class="pay-chip">Apple Pay</span>
+                <span class="pay-chip">STC Pay</span>
+                <span class="pay-chip pay-chip--accent">tabby</span>
+                <span class="pay-chip pay-chip--accent">tamara</span>
+              </div>
+            </div>
+          </details>
+
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>هل يمكنني إلغاء أو تعديل الطلب بعد تأكيده؟</span>
+              <span class="faq-item__icon"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p>يمكنك الإلغاء أو التعديل خلال أول 30 دقيقة من تأكيد الطلب. بعد ذلك يدخل الطلب مرحلة التحضير ولا يمكن تعديله. لأي طلب عاجل تواصل معنا فوراً عبر واتساب أو الاتصال.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>ما هي متطلبات تشغيل الخدمة؟</span>
+              <span class="faq-item__icon"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p><strong>الكمبيوتر:</strong> جهاز PC أو لابتوب بنظام Windows 10 / 11، معالج Intel أو AMD من الجيل الثامن أو أعلى، كرت شاشة Nvidia حديث (يُفضّل RTX 2080 أو أعلى).</p>
+              <p><strong>كرت الكابتشر:</strong> Elgato 4K X / 4K Pro / HD60 X / HD60 S+ / 4K60 Pro MK.2، أو من Avermedia: Live Gamer HD 2 و Ultra.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" data-reveal>
+            <summary class="faq-item__q">
+              <span>شرح الخدمة وآلية التركيب</span>
+              <span class="faq-item__icon"></span>
+            </summary>
+            <div class="faq-item__a">
+              <p>يتم تجهيز الخدمة بالكامل خلال 2–3 ساعات بعد تحديد الموعد. تعتمد الخدمة على ربط الكونسول بالكمبيوتر عبر كرت الكابتشر (Capture Card) لنقل الصورة. بعد الربط يتم تهيئة النظام وضبط الإعدادات على أفضل أداء، مع التأكد من تحديث وتجهيز كل القطع لعمل سلس ومستقر.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         CONTACT
+    ========================================================= -->
+    <section class="section section--contact" id="contact" aria-labelledby="contact-heading">
+      <div class="section-inner">
+        <header class="section-head section-head--center">
+          <span class="eyebrow"><span class="eyebrow__num">05</span><span class="eyebrow__bar"></span>تواصل معنا</span>
+          <h2 class="section-title" id="contact-heading">
+            فريقنا جاهز <span class="text-blue">للرد فوراً.</span>
+          </h2>
+          <p class="section-sub">للحجوزات، الاستفسارات، أو الدعم الفني — تواصل معنا مباشرة عبر القنوات التالية.</p>
+        </header>
+
+        <div class="contact-grid">
+          <a class="contact-card" href="https://wa.me/966573534407" target="_blank" rel="noopener">
+            <div class="contact-card__icon contact-card__icon--wa">
+              <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                <path d="M16 4C9.4 4 4 9.4 4 16c0 2.1.6 4.1 1.6 5.9L4 28l6.3-1.6c1.7.9 3.7 1.4 5.7 1.4 6.6 0 12-5.4 12-12S22.6 4 16 4zm6.9 17c-.3.8-1.4 1.4-2.3 1.6-.6.1-1.4.2-4.1-.9-3.4-1.4-5.6-4.9-5.8-5.1-.2-.2-1.4-1.9-1.4-3.6 0-1.7.9-2.6 1.3-2.9.3-.3.7-.4 1-.4h.7c.2 0 .5-.1.8.6.3.7.9 2.3.9 2.4 0 .2.1.3 0 .5-.1.2-.2.3-.4.5l-.5.6c-.2.2-.3.4-.1.7s.9 1.5 1.9 2.4c1.3 1.1 2.4 1.5 2.7 1.6.3.1.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.3.7-.2.3.1 1.9.9 2.2 1 .3.2.5.2.6.4.1.3.1.9-.2 1.7z"/>
+              </svg>
+            </div>
+            <div class="contact-card__body">
+              <span class="contact-card__label">واتساب</span>
+              <span class="contact-card__value" dir="ltr">+966 57 353 4407</span>
+              <span class="contact-card__hint">رد سريع خلال دقائق</span>
+            </div>
+          </a>
+
+          <a class="contact-card" href="tel:+966573534407">
+            <div class="contact-card__icon contact-card__icon--call">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true">
+                <path d="M6 5h5l2 6-3 2c1 3 3.5 5.5 6.5 6.5l2-3 6 2v5c0 1.1-.9 2-2 2A18 18 0 0 1 4 7c0-1.1.9-2 2-2z"/>
+              </svg>
+            </div>
+            <div class="contact-card__body">
+              <span class="contact-card__label">اتصال مباشر</span>
+              <span class="contact-card__value" dir="ltr">+966 57 353 4407</span>
+              <span class="contact-card__hint">يومياً من 10ص حتى 12م</span>
+            </div>
+          </a>
+
+          <a class="contact-card" href="mailto:support@loadryx.com">
+            <div class="contact-card__icon contact-card__icon--mail">
+              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true">
+                <rect x="4" y="7" width="24" height="18" rx="1"/><path d="M4 9l12 9 12-9"/>
+              </svg>
+            </div>
+            <div class="contact-card__body">
+              <span class="contact-card__label">البريد الإلكتروني</span>
+              <span class="contact-card__value" dir="ltr">support@loadryx.com</span>
+              <span class="contact-card__hint">لطلبات العمل والشراكات</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="contact-pay">
+          <span class="contact-pay__label">طرق الدفع المتاحة</span>
+          <div class="contact-pay__chips">
+            <span class="pay-chip">مدى</span>
+            <span class="pay-chip">VISA</span>
+            <span class="pay-chip">Mastercard</span>
+            <span class="pay-chip">Apple Pay</span>
+            <span class="pay-chip">STC Pay</span>
+            <span class="pay-chip pay-chip--accent">tabby</span>
+            <span class="pay-chip pay-chip--accent">tamara</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         FOOTER
+    ========================================================= -->
+    <footer class="site-footer" role="contentinfo">
+      <div class="site-footer__inner">
+        <div class="site-footer__brand">
+          <img src="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779614344/LOADRYX_logo_transparent_4x_f01fwd.png" alt="LOADRYX" />
+          <p>مُصمَّم للاستجابة. مبني للانتصار.<br/>سكربتات وأدوات ذكاء اصطناعي للاعبين المحترفين.</p>
+        </div>
+
+        <div class="site-footer__col">
+          <h4>المتجر</h4>
+          <ul>
+            <li><a href="#products">PS5 AI</a></li>
+            <li><a href="#products">Setting AI</a></li>
+            <li><a href="#products">Script Xim Matrix</a></li>
+            <li><a href="#products">الملحقات</a></li>
+          </ul>
+        </div>
+
+        <div class="site-footer__col">
+          <h4>الحساب</h4>
+          <ul>
+            <li><a href="#account">حسابي</a></li>
+            <li><a href="#orders">طلباتي</a></li>
+            <li><a href="#cart">السلة</a></li>
+            <li><a href="#checkout">إتمام الشراء</a></li>
+          </ul>
+        </div>
+
+        <div class="site-footer__col">
+          <h4>الدعم</h4>
+          <ul>
+            <li><a href="#faq">الأسئلة الشائعة</a></li>
+            <li><a href="#contact">تواصل معنا</a></li>
+            <li><a href="https://wa.me/966573534407" target="_blank" rel="noopener">واتساب</a></li>
+            <li><a href="#policy">الشروط والخصوصية</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="site-footer__bottom">
+        <span>© <span data-year>2025</span> LOADRYX. جميع الحقوق محفوظة.</span>
+        <div class="site-footer__pays">
+          <span>tabby</span><span>tamara</span><span>VISA</span><span>مدى</span><span>Apple Pay</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ========================================================
+       SAR SYMBOL (new Saudi Riyal mark, inline SVG sprite)
+  ========================================================= -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="sar-symbol" viewBox="0 0 24 28">
+        <!-- Stylized new SAR mark: two stacked horizontal bars + curved vertical stroke (riyal calligraphic) -->
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+          <path d="M3 11h14"/>
+          <path d="M3 17h14"/>
+          <path d="M17 3v15c0 4-2.5 6.5-6 7"/>
+          <path d="M11 6v4"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
