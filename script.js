@@ -1,8 +1,10 @@
 /* ============================================================
    LOADRYX — main script
-   - Hero proximity headline (transform-only, GPU, zero reflow)
-   - Canvas particles (proofcore-inspired: sparse + connections)
-   - Cart drawer + page-level cart sync
+   - Tactical Signal Field canvas (grid + nodes + pings + crosshair)
+   - HUD headline (3D tilt + continuous scan line, transform-only)
+   - Section indicator: clickable smooth-scroll dots
+   - Right-click disable on hero media
+   - Cart drawer + counter sync
    - Mobile menu, smooth scroll, scroll-spy, accordion, reveal
    - Header scroll state
    ============================================================ */
@@ -14,7 +16,7 @@
   const isCoarse      = window.matchMedia("(pointer: coarse)").matches;
 
   /* ============================================================
-     1. Hero video error fallback
+     1. Hero video — autoplay attempt + error fallback + no-save
      ============================================================ */
   const videoMedia = document.querySelector(".hero-media");
   const heroVideo  = document.querySelector(".hero-video");
@@ -25,204 +27,211 @@
     const p = heroVideo.play();
     if (p && typeof p.catch === "function") p.catch(() => {});
 
-    // يمنع خراب تموضع الفيديو عند فتح/إغلاق DevTools أو تغيير حجم النافذة
-    let mediaResizeTimer = 0;
-    const repaintHeroVideo = () => {
-      clearTimeout(mediaResizeTimer);
-      mediaResizeTimer = setTimeout(() => {
-        videoMedia.style.transform = "translateZ(0)";
-        heroVideo.style.transform = getComputedStyle(heroVideo).transform;
-        requestAnimationFrame(() => {
-          videoMedia.style.transform = "";
-          heroVideo.style.transform = "";
-          if (heroVideo.paused) {
-            const play = heroVideo.play();
-            if (play && typeof play.catch === "function") play.catch(() => {});
-          }
-        });
-      }, 140);
-    };
-    window.addEventListener("resize", repaintHeroVideo, { passive: true });
-    window.addEventListener("orientationchange", repaintHeroVideo, { passive: true });
+    // disable context menu / drag on the hero media to discourage saving
+    const noMenu = (e) => e.preventDefault();
+    videoMedia.addEventListener("contextmenu", noMenu);
+    heroVideo.addEventListener("contextmenu", noMenu);
+    const fb = document.querySelector(".hero-fallback");
+    if (fb) {
+      fb.addEventListener("contextmenu", noMenu);
+      fb.addEventListener("dragstart", noMenu);
+    }
+    heroVideo.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
+    heroVideo.setAttribute("disablepictureinpicture", "");
   }
 
   /* ============================================================
-     2. Canvas — Tactical Signal Field
-     - sparse signal nodes, slow drift + breathing
-     - faint tactical grid (88px cells)
-     - scan pulse rings from random nodes every 3-5s
-     - mouse radar: nearby nodes & connections brighten
-     - connections only within 82px (very sparse)
-     - rAF capped to ~60fps, paused on visibility hidden
+     2. TACTICAL SIGNAL FIELD — canvas
+     A premium tactical/HUD background:
+     - faint grid
+     - fixed node points
+     - occasional signal pings expanding from nodes
+     - faint connection lines between close nodes
+     - smooth crosshair tracker following the mouse
+     All transform/draw-only, capped at ~60fps, paused on hidden tab.
      ============================================================ */
   const canvas = document.getElementById("hero-particles");
   if (canvas && !reducedMotion) {
     const ctx = canvas.getContext("2d", { alpha: true });
     let w = 0, h = 0, dpr = 1;
     let nodes = [];
-    let pulses = [];
-    let mx = -9999, my = -9999;
-    let rafId = 0;
-    let running = true;
-    let lastT = 0;
-    let nextPulseT = 0;
+    let pings = [];
+    let rafId = 0, running = true, lastT = 0;
+    let mx = -9999, my = -9999, tmx = -9999, tmy = -9999;
+    let lastPingAt = 0;
 
-    const BLUE      = "3, 131, 244";
-    const GRID      = 88;
-    const NODE_MIN  = 12;
-    const NODE_MAX  = 18;
-    const CONN_DIST = 82;
-    const CONN_SQ   = CONN_DIST * CONN_DIST;
-    const RADAR     = 120;
-    const RADAR_SQ  = RADAR * RADAR;
-    const PULSE_MIN = 3000;
-    const PULSE_MAX = 5800;
-    const PULSE_V   = 0.040;
-    const PULSE_MAXR = 128;
+    const GRID_SIZE = 64;
+    const GRID_ALPHA = 0.045;
+    const NODE_COUNT_TARGET = 14;
+    const PING_LIFESPAN = 2200;       // ms
+    const PING_MAX_R = 110;            // px
+    const CONN_MAX = 170;              // px
+    const CONN_MAX_SQ = CONN_MAX * CONN_MAX;
+    const PING_INTERVAL = [900, 2200]; // ms range between pings
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = rect.width;
-      h = rect.height;
+      w = rect.width; h = rect.height;
       canvas.width  = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      build();
+      buildNodes();
     }
 
-    function build() {
-      const count = Math.max(NODE_MIN, Math.min(Math.round(w * h / 48000), NODE_MAX));
-      nodes = Array.from({ length: count }, () => ({
-        x:     Math.random() * w,
-        y:     Math.random() * h,
-        vx:    (Math.random() - 0.5) * 0.036,
-        vy:    (Math.random() - 0.5) * 0.036,
-        r:     Math.random() * 1.2 + 0.7,
-        phase: Math.random() * Math.PI * 2,
-        freq:  Math.random() * 0.0006 + 0.0003,
-      }));
-      pulses = [];
-      nextPulseT = 0;
-    }
-
-    function mFactor(x, y) {
-      if (mx < -1000) return 0;
-      const d2 = (x - mx) * (x - mx) + (y - my) * (y - my);
-      return d2 < RADAR_SQ ? 1 - Math.sqrt(d2) / RADAR : 0;
+    function buildNodes() {
+      // distribute nodes pseudo-evenly using a coarse 4×3 grid jitter
+      const cols = 5, rows = 3;
+      nodes = [];
+      const targetCount = Math.min(NODE_COUNT_TARGET, cols * rows);
+      const used = new Set();
+      while (nodes.length < targetCount) {
+        const c = Math.floor(Math.random() * cols);
+        const r = Math.floor(Math.random() * rows);
+        const key = `${c},${r}`;
+        if (used.has(key)) continue;
+        used.add(key);
+        const cellW = w / cols, cellH = h / rows;
+        nodes.push({
+          x: cellW * c + cellW * (0.25 + Math.random() * 0.5),
+          y: cellH * r + cellH * (0.25 + Math.random() * 0.5),
+          baseAlpha: 0.35 + Math.random() * 0.35,
+        });
+      }
     }
 
     function drawGrid() {
-      ctx.strokeStyle = `rgba(${BLUE}, 0.02)`;
-      ctx.lineWidth   = 0.5;
-      const ox = ((w % GRID) / 2) | 0;
-      const oy = ((h % GRID) / 2) | 0;
-      for (let x = ox; x < w; x += GRID) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      ctx.strokeStyle = `rgba(3, 131, 244, ${GRID_ALPHA})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = (w / 2) % GRID_SIZE; x < w; x += GRID_SIZE) {
+        ctx.moveTo(x, 0); ctx.lineTo(x, h);
       }
-      for (let y = oy; y < h; y += GRID) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      for (let y = (h / 2) % GRID_SIZE; y < h; y += GRID_SIZE) {
+        ctx.moveTo(0, y); ctx.lineTo(w, y);
       }
+      ctx.stroke();
     }
 
     function drawConnections() {
-      ctx.lineWidth = 0.55;
       for (let i = 0; i < nodes.length; i++) {
-        const a  = nodes[i];
-        const ma = mFactor(a.x, a.y);
         for (let j = i + 1; j < nodes.length; j++) {
-          const b  = nodes[j];
+          const a = nodes[i], b = nodes[j];
           const dx = a.x - b.x, dy = a.y - b.y;
           const d2 = dx * dx + dy * dy;
-          if (d2 >= CONN_SQ) continue;
-          const mb    = mFactor(b.x, b.y);
-          const boost = 1 + (ma + mb) * 3.5;
-          const k     = (1 - d2 / CONN_SQ) * 0.042 * boost;
-          ctx.strokeStyle = `rgba(${BLUE}, ${k.toFixed(3)})`;
-          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          if (d2 < CONN_MAX_SQ) {
+            const k = 1 - d2 / CONN_MAX_SQ;
+            ctx.strokeStyle = `rgba(3, 131, 244, ${(k * 0.08).toFixed(3)})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
         }
       }
     }
 
-    function drawNodes(t) {
+    function drawNodes() {
       for (let i = 0; i < nodes.length; i++) {
-        const n  = nodes[i];
-        const mf = mFactor(n.x, n.y);
-        const br = 0.5 + 0.5 * Math.sin(n.phase + t * n.freq);
-        const a  = Math.min(0.82, 0.14 + br * 0.11 + mf * 0.56);
-        const r  = n.r * (1 + mf * 1.8);
-
-        const glowR = r + 3 + mf * 9;
-        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
-        g.addColorStop(0, `rgba(${BLUE}, ${(a * 0.35).toFixed(3)})`);
-        g.addColorStop(1, `rgba(${BLUE}, 0)`);
-        ctx.beginPath(); ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
-        ctx.fillStyle = g; ctx.fill();
-
-        ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${BLUE}, ${a.toFixed(3)})`; ctx.fill();
+        const n = nodes[i];
+        // outer faint ring
+        ctx.strokeStyle = `rgba(3, 131, 244, ${(n.baseAlpha * 0.25).toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2); ctx.stroke();
+        // inner solid dot
+        ctx.fillStyle = `rgba(3, 131, 244, ${n.baseAlpha.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 1.4, 0, Math.PI * 2); ctx.fill();
       }
     }
 
-    function drawPulses(t) {
-      for (let i = pulses.length - 1; i >= 0; i--) {
-        const p    = pulses[i];
-        const r    = (t - p.t0) * PULSE_V;
-        if (r >= PULSE_MAXR) { pulses.splice(i, 1); continue; }
-        const fade = 1 - r / PULSE_MAXR;
-        const a    = 0.36 * fade * fade;
-        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(${BLUE}, ${a.toFixed(3)})`;
-        ctx.lineWidth   = 0.7; ctx.stroke();
-        if (r > 14) {
-          ctx.beginPath(); ctx.arc(p.x, p.y, r * 0.52, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(${BLUE}, ${(a * 0.26).toFixed(3)})`;
-          ctx.lineWidth   = 0.35; ctx.stroke();
-        }
+    function spawnPing(now) {
+      if (!nodes.length) return;
+      const n = nodes[Math.floor(Math.random() * nodes.length)];
+      pings.push({ x: n.x, y: n.y, t0: now });
+    }
+
+    function drawPings(now) {
+      for (let i = pings.length - 1; i >= 0; i--) {
+        const p = pings[i];
+        const t = (now - p.t0) / PING_LIFESPAN;
+        if (t >= 1) { pings.splice(i, 1); continue; }
+        // ease-out
+        const eased = 1 - Math.pow(1 - t, 2.4);
+        const r = eased * PING_MAX_R;
+        const a = (1 - t) * 0.55;
+        ctx.strokeStyle = `rgba(3, 131, 244, ${a.toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.stroke();
       }
     }
 
-    function step(t) {
+    function drawCrosshair() {
+      // smooth-follow mouse
+      mx += (tmx - mx) * 0.18;
+      my += (tmy - my) * 0.18;
+      if (tmx < -1000) return;
+      const x = mx, y = my;
+
+      ctx.strokeStyle = "rgba(3, 131, 244, 0.55)";
+      ctx.lineWidth = 1;
+
+      // four small ticks around the cursor
+      const gap = 10, len = 12;
+      ctx.beginPath();
+      ctx.moveTo(x - gap - len, y); ctx.lineTo(x - gap, y);
+      ctx.moveTo(x + gap,        y); ctx.lineTo(x + gap + len, y);
+      ctx.moveTo(x, y - gap - len);  ctx.lineTo(x, y - gap);
+      ctx.moveTo(x, y + gap);        ctx.lineTo(x, y + gap + len);
+      ctx.stroke();
+
+      // tracking ring
+      ctx.strokeStyle = "rgba(3, 131, 244, 0.30)";
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.stroke();
+
+      // corner brackets (small offset square)
+      const b = 22, bl = 6;
+      ctx.strokeStyle = "rgba(3, 131, 244, 0.18)";
+      ctx.beginPath();
+      ctx.moveTo(x - b, y - b + bl); ctx.lineTo(x - b, y - b); ctx.lineTo(x - b + bl, y - b);
+      ctx.moveTo(x + b - bl, y - b); ctx.lineTo(x + b, y - b); ctx.lineTo(x + b, y - b + bl);
+      ctx.moveTo(x - b, y + b - bl); ctx.lineTo(x - b, y + b); ctx.lineTo(x - b + bl, y + b);
+      ctx.moveTo(x + b - bl, y + b); ctx.lineTo(x + b, y + b); ctx.lineTo(x + b, y + b - bl);
+      ctx.stroke();
+    }
+
+    function frame(t) {
       if (!running) { rafId = 0; return; }
       const dt = t - lastT;
-      if (dt < 14) { rafId = requestAnimationFrame(step); return; }
+      if (dt < 14) { rafId = requestAnimationFrame(frame); return; }
       lastT = t;
-
-      if (t >= nextPulseT && nodes.length) {
-        const n = nodes[Math.floor(Math.random() * nodes.length)];
-        pulses.push({ x: n.x, y: n.y, t0: t });
-        nextPulseT = t + PULSE_MIN + Math.random() * (PULSE_MAX - PULSE_MIN);
-      }
 
       ctx.clearRect(0, 0, w, h);
       drawGrid();
       drawConnections();
-      drawPulses(t);
-      drawNodes(t);
+      drawPings(t);
+      drawNodes();
+      drawCrosshair();
 
-      for (let i = 0; i < nodes.length; i++) {
-        const n = nodes[i];
-        n.x += n.vx; n.y += n.vy;
-        if (n.x < -8) n.x = w + 8; else if (n.x > w + 8) n.x = -8;
-        if (n.y < -8) n.y = h + 8; else if (n.y > h + 8) n.y = -8;
+      // schedule next ping
+      if (t > lastPingAt) {
+        spawnPing(t);
+        lastPingAt = t + PING_INTERVAL[0] + Math.random() * (PING_INTERVAL[1] - PING_INTERVAL[0]);
       }
 
-      rafId = requestAnimationFrame(step);
+      rafId = requestAnimationFrame(frame);
     }
 
-    function start() { if (rafId) return; running = true; lastT = 0; rafId = requestAnimationFrame(step); }
+    function start() { if (rafId) return; running = true; lastT = 0; rafId = requestAnimationFrame(frame); }
     function stop()  { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
 
-    let canvasResizeTimer = 0;
-    const scheduleCanvasResize = () => { clearTimeout(canvasResizeTimer); canvasResizeTimer = setTimeout(resize, 120); };
-    window.addEventListener("resize",            scheduleCanvasResize, { passive: true });
-    window.addEventListener("orientationchange", scheduleCanvasResize, { passive: true });
+    window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", (e) => {
       const rect = canvas.getBoundingClientRect();
-      mx = e.clientX - rect.left;
-      my = e.clientY - rect.top;
+      tmx = e.clientX - rect.left;
+      tmy = e.clientY - rect.top;
+      if (mx < -1000) { mx = tmx; my = tmy; }
     }, { passive: true });
-    window.addEventListener("pointerleave", () => { mx = my = -9999; });
+    window.addEventListener("pointerleave", () => { tmx = -9999; });
     document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); else start(); });
 
     resize();
@@ -230,49 +239,35 @@
   }
 
   /* ============================================================
-     3. Hero — Tactical Magnetic Headline
-     - writes --mx / --my / --prox-glow on the title element
-     - each word shifts via translate3d (CSS calc, zero reflow)
-     - --prox-glow drives blue glow intensity on the bottom line
-     - clamped to ±1.0 so words stay cohesive (was ±1.4)
+     3. HUD headline — 3D tilt + continuous scan line
+     Pure transform animation, no reflow.
      ============================================================ */
-  const title = document.querySelector("[data-proximity-target]");
+  const title = document.querySelector("[data-tactical-title]");
   if (title && !reducedMotion && !isCoarse) {
-    let pmx = 0, pmy = 0, pglow = 0;
-    let cur = { x: 0, y: 0, g: 0 };
+    let pmx = 0, pmy = 0;          // target normalized -1..1
+    let cur = { x: 0, y: 0 };
     let raf = 0;
     let active = false;
-    const SMOOTH = 0.09;
 
     function onMove(e) {
-      const r  = title.getBoundingClientRect();
-      const px = (e.clientX - (r.left + r.width  / 2)) / (r.width  / 2);
-      const py = (e.clientY - (r.top  + r.height / 2)) / (r.height / 2);
-      pmx   = Math.max(-1.0, Math.min(1.0, px));
-      pmy   = Math.max(-1.0, Math.min(1.0, py));
-      pglow = Math.max(0, 1 - Math.sqrt(px * px + py * py) * 0.78);
+      const r = title.getBoundingClientRect();
+      pmx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+      pmy = Math.max(-1, Math.min(1, (e.clientY - (r.top  + r.height / 2)) / (r.height / 2)));
       if (!active) { active = true; raf = requestAnimationFrame(loop); }
     }
-
-    function onLeave() { pmx = 0; pmy = 0; pglow = 0; }
+    function onLeave() { pmx = 0; pmy = 0; }
 
     function loop() {
-      cur.x += (pmx   - cur.x) * SMOOTH;
-      cur.y += (pmy   - cur.y) * SMOOTH;
-      cur.g += (pglow - cur.g) * SMOOTH;
-      title.style.setProperty("--mx",        cur.x.toFixed(3));
-      title.style.setProperty("--my",        cur.y.toFixed(3));
-      title.style.setProperty("--prox-glow", cur.g.toFixed(3));
-      const still = Math.abs(cur.x - pmx) < 0.001
-                 && Math.abs(cur.y - pmy) < 0.001
-                 && Math.abs(cur.g - pglow) < 0.001;
-      if (!still || pmx !== 0 || pmy !== 0 || pglow !== 0) {
+      cur.x += (pmx - cur.x) * 0.10;
+      cur.y += (pmy - cur.y) * 0.10;
+      title.style.setProperty("--tx", cur.x.toFixed(3));
+      title.style.setProperty("--ty", cur.y.toFixed(3));
+      if (Math.abs(cur.x - pmx) > 0.001 || Math.abs(cur.y - pmy) > 0.001 || pmx || pmy) {
         raf = requestAnimationFrame(loop);
       } else {
         active = false;
-        title.style.setProperty("--mx",        "0");
-        title.style.setProperty("--my",        "0");
-        title.style.setProperty("--prox-glow", "0");
+        title.style.setProperty("--tx", 0);
+        title.style.setProperty("--ty", 0);
       }
     }
 
@@ -337,14 +332,27 @@
   });
 
   /* ============================================================
-     7. Scroll-spy: active section dot
+     7. Section indicator — clickable dots
+     ============================================================ */
+  document.querySelectorAll("[data-indicator-dot]").forEach((dot) => {
+    dot.style.cursor = "pointer";
+    dot.addEventListener("click", () => {
+      const id = dot.getAttribute("data-target");
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset();
+      window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
+    });
+  });
+
+  /* ============================================================
+     8. Scroll-spy: active indicator dot
      ============================================================ */
   const sectionsToSpy = ["home","why","products","faq","contact"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
   const indicatorDots = document.querySelectorAll("[data-indicator-dot]");
-  const indicatorNum = document.querySelector("[data-indicator-num]");
-  const sectionNums = { home: "01", why: "02", products: "03", faq: "04", contact: "05" };
 
   if ("IntersectionObserver" in window && sectionsToSpy.length) {
     const observer = new IntersectionObserver((entries) => {
@@ -355,7 +363,6 @@
       if (best) {
         const id = best.target.id;
         indicatorDots.forEach((d) => d.classList.toggle("is-active", d.getAttribute("data-target") === id));
-        if (indicatorNum && sectionNums[id]) indicatorNum.textContent = sectionNums[id];
       }
     }, {
       rootMargin: "-40% 0px -50% 0px",
@@ -365,7 +372,7 @@
   }
 
   /* ============================================================
-     8. Scroll reveal
+     9. Scroll reveal
      ============================================================ */
   if ("IntersectionObserver" in window) {
     const revealObs = new IntersectionObserver((entries) => {
@@ -382,7 +389,7 @@
   }
 
   /* ============================================================
-     9. FAQ accordion (one open at a time)
+    10. FAQ accordion (one open at a time)
      ============================================================ */
   const faqItems = document.querySelectorAll(".faq-item");
   faqItems.forEach((item) => {
@@ -394,7 +401,7 @@
   });
 
   /* ============================================================
-    10. Product category tabs (home + products page)
+    11. Product category tabs
      ============================================================ */
   const catTabs = document.querySelectorAll("[data-cat-tab]");
   const catPanels = document.querySelectorAll("[data-cat-panel]");
@@ -420,7 +427,7 @@
   catTabs.forEach((t) => t.addEventListener("click", () => switchProductCategory(t.getAttribute("data-cat-tab"))));
 
   /* ============================================================
-    11. Add-to-cart buttons (delegated)
+    12. Add-to-cart (delegated)
      ============================================================ */
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-add-to-cart]");
@@ -444,7 +451,7 @@
   }
 
   /* ============================================================
-    12. Cart drawer + counter sync
+    13. Cart drawer + counter sync
      ============================================================ */
   function refreshCartUI() {
     if (!window.LR_CART) return;
@@ -523,7 +530,6 @@
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeCartDrawer(); });
 
-  // cart line qty controls (delegated, works on drawer & cart page)
   document.addEventListener("click", (e) => {
     const line = e.target.closest("[data-cart-line]");
     if (!line || !window.LR_CART) return;
@@ -540,7 +546,6 @@
   });
 
   window.addEventListener("cart:change", refreshCartUI);
-  // initial UI refresh (after partials inject)
   setTimeout(refreshCartUI, 60);
 
 })();
