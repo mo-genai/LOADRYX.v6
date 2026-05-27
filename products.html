@@ -30,15 +30,15 @@
     <section class="section section--deep">
       <div class="section-inner">
         <nav class="cat-tabs" aria-label="فلترة الفئة" style="margin-bottom:32px;">
-          <a class="cat-tab is-active" href="products.html">
+          <a class="cat-tab is-active" href="products.html" data-products-filter="all">
             <span class="cat-tab__name">الكل</span>
             <span class="cat-tab__count" data-count-all></span>
           </a>
-          <a class="cat-tab" href="category.html?cat=ps5"><span class="cat-tab__name">PS5 AI</span><span class="cat-tab__count">7 منتجات</span></a>
-          <a class="cat-tab" href="category.html?cat=setting"><span class="cat-tab__name">Setting AI</span><span class="cat-tab__count">منتجان</span></a>
-          <a class="cat-tab" href="category.html?cat=script"><span class="cat-tab__name">Script Xim Matrix</span><span class="cat-tab__count">منتجان</span></a>
-          <a class="cat-tab" href="category.html?cat=accessories"><span class="cat-tab__name">الملحقات</span><span class="cat-tab__count">3 منتجات</span></a>
-          <a class="cat-tab" href="category.html?cat=games"><span class="cat-tab__name">الألعاب</span><span class="cat-tab__count">قريباً</span></a>
+          <a class="cat-tab" href="category.html?cat=ps5" data-products-filter="ps5"><span class="cat-tab__name">PS5 AI</span><span class="cat-tab__count">7 منتجات</span></a>
+          <a class="cat-tab" href="category.html?cat=setting" data-products-filter="setting"><span class="cat-tab__name">Setting AI</span><span class="cat-tab__count">منتجان</span></a>
+          <a class="cat-tab" href="category.html?cat=script" data-products-filter="script"><span class="cat-tab__name">Script Xim Matrix</span><span class="cat-tab__count">منتجان</span></a>
+          <a class="cat-tab" href="category.html?cat=accessories" data-products-filter="accessories"><span class="cat-tab__name">الملحقات</span><span class="cat-tab__count">3 منتجات</span></a>
+          <a class="cat-tab" href="category.html?cat=games" data-products-filter="games"><span class="cat-tab__name">الألعاب</span><span class="cat-tab__count">قريباً</span></a>
         </nav>
 
         <div data-all-products></div>
@@ -53,12 +53,37 @@
   <script src="script.js" defer></script>
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
-      const tryCount = () => {
-        if (!window.LR_DATA) return setTimeout(tryCount, 30);
-        const el = document.querySelector("[data-count-all]");
-        if (el) el.textContent = window.LR_DATA.PRODUCTS.length + " منتج";
+      const tryInit = () => {
+        if (!window.LR_DATA) return setTimeout(tryInit, 30);
+
+        const countEl = document.querySelector("[data-count-all]");
+        if (countEl) countEl.textContent = window.LR_DATA.PRODUCTS.length + " منتج";
+
+        const tabs = document.querySelectorAll("[data-products-filter]");
+        const host = document.querySelector("[data-all-products]");
+
+        const filterProducts = (cat) => {
+          const cards = host ? host.querySelectorAll(".product-card") : [];
+          cards.forEach((card, index) => {
+            const product = window.LR_DATA.PRODUCTS[index];
+            const show = cat === "all" || (product && product.cat === cat);
+            card.hidden = !show;
+          });
+
+          tabs.forEach((tab) => {
+            const active = tab.getAttribute("data-products-filter") === cat;
+            tab.classList.toggle("is-active", active);
+          });
+        };
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", (event) => {
+            event.preventDefault();
+            filterProducts(tab.getAttribute("data-products-filter") || "all");
+          });
+        });
       };
-      tryCount();
+      tryInit();
     });
   </script>
 </body>
