@@ -1,6 +1,7 @@
 window.addEventListener("load", function () {
   var params = new URLSearchParams(location.search);
-  if (params.get("id") !== "ps5-ai-ultimate") return;
+  var product = window.LR_DATA && window.LR_DATA.getProduct(params.get("id"));
+  if (!product || !product.image) return;
 
   var media = document.querySelector(".product-detail__media");
   if (!media) return;
@@ -12,13 +13,13 @@ window.addEventListener("load", function () {
     box.className = "lr-lightbox";
 
     var img = document.createElement("img");
-    img.src = "ps5-ai-ultimate.png";
-    img.alt = "PS5 AI AIM Package";
+    img.src = product.image;
+    img.alt = product.name;
 
     var close = document.createElement("button");
     close.type = "button";
     close.className = "lr-lightbox-x";
-    close.textContent = "×";
+    close.innerHTML = "&times;";
 
     box.onclick = function () {
       box.remove();

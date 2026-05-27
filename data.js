@@ -111,6 +111,7 @@
       art: { kind: opts.kind || "game", lines: opts.lines },
       price: opts.price,
       badge: opts.badge,
+      image: opts.image || null,
       short: `نظام تصويب ذكي يعتمد على الذكاء الاصطناعي لتحليل الصورة وتحسين الـ Aim بشكل احترافي أثناء اللعب — مصمم خصيصاً لـ ${opts.upper} على PS5.`,
       intro: `هل تريد التفوق في ${opts.upper} وتحقيق دقة تصويب أعلى في المواجهات؟ مع AI AIM PROGRAM ستحصل على نظام تصويب ذكي يعتمد على الذكاء الاصطناعي لتحليل الصورة وتحسين الـ Aim بشكل احترافي أثناء اللعب. البرنامج يعمل مع الكونسول PS5 عبر الـ PC باستخدام تحليل الصورة المباشر، مما يساعدك على تحسين سرعة التصويب والثبات في الاشتباكات.`,
       sections: [
@@ -134,6 +135,7 @@
       title: "PS5 AI AIM PACKAGE — ULTIMATE EDITION",
       art: { kind: "ultimate", lines: ["PS5 AI", "ULTIMATE EDITION"] },
       price: 10500,
+      image: "ps5-ai-ultimate.png",
       badge: { text: "الباكج الكامل", kind: "featured" },
       short: "7 ألعاب كاملة، إعداد احترافي، ودعم متواصل. أعلى تجربة AI Aim للـ PS5.",
       intro: "هل تريد السيطرة في ألعاب الشوتر على PS5 وتحقيق Aim احترافي بمساعدة الذكاء الاصطناعي؟ مع باكج PS5 AI AIM ستحصل على نظام تصويب ذكي يعتمد على AI لتحليل الصورة المباشر وتحسين الأداء داخل اللعبة بشكل احترافي، مع إعدادات مخصصة لكل لعبة لتحقيق أفضل ثبات وسرعة استجابة أثناء اللعب.",
@@ -182,12 +184,12 @@
         { heading: "الأمان", items: AI_SAFETY },
       ],
     },
-    ps5Game({ id: "ps5-ai-apex",     name: "PS5 AI — Apex Legends",   upper: "APEX LEGENDS",  lines: ["APEX", "LEGENDS"],   price: 1426 }),
-    ps5Game({ id: "ps5-ai-cod",      name: "PS5 AI — Call of Duty",   upper: "CALL of DUTY",  lines: ["CALL", "OF DUTY"],   price: 1426 }),
+    ps5Game({ id: "ps5-ai-apex",     name: "PS5 AI — Apex Legends",   upper: "APEX LEGENDS",  lines: ["APEX", "LEGENDS"],   price: 1426, image: "ps5-ai-apex.png" }),
+    ps5Game({ id: "ps5-ai-cod",      name: "PS5 AI — Call of Duty",   upper: "CALL of DUTY",  lines: ["CALL", "OF DUTY"],   price: 1426, image: "ps5-ai-cod.png" }),
     ps5Game({ id: "ps5-ai-valorant", name: "PS5 AI — Valorant",       upper: "VALORANT",      lines: ["VALORANT"],          price: 1426 }),
-    ps5Game({ id: "ps5-ai-overwatch",name: "PS5 AI — Overwatch",      upper: "OVERWATCH",     lines: ["OVER", "WATCH"],     price: 1426 }),
-    ps5Game({ id: "ps5-ai-fortnite", name: "PS5 AI — Fortnite",       upper: "FORTNITE",      lines: ["FORT", "NITE"],      price: 1500 }),
-    ps5Game({ id: "ps5-ai-arc",      name: "PS5 AI — ARC Raiders",    upper: "ARC RAIDERS",   lines: ["ARC", "RAIDERS"],    price: 1426 }),
+    ps5Game({ id: "ps5-ai-overwatch",name: "PS5 AI — Overwatch",      upper: "OVERWATCH",     lines: ["OVER", "WATCH"],     price: 1426, image: "ps5-ai-overwatch.png" }),
+    ps5Game({ id: "ps5-ai-fortnite", name: "PS5 AI — Fortnite",       upper: "FORTNITE",      lines: ["FORT", "NITE"],      price: 1500, image: "ps5-ai-fortnite.png" }),
+    ps5Game({ id: "ps5-ai-arc",      name: "PS5 AI — ARC Raiders",    upper: "ARC RAIDERS",   lines: ["ARC", "RAIDERS"],    price: 1426, image: "ps5-ai-arc.png" }),
 
     /* ----- Setting AI ------------------------------------------ */
     {

@@ -24,6 +24,17 @@
     arrow: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>`,
   };
 
+  function productArtHTML(p, opts = {}) {
+    const isUltimate = p.art.kind === "ultimate";
+    const content = p.image
+      ? `<img class="product-art__image" src="${p.image}" alt="${p.name}" loading="${opts.eager ? "eager" : "lazy"}" decoding="async">`
+      : isUltimate
+        ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
+        : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
+
+    return `<div class="product-art product-art--${p.art.kind}${p.image ? " product-art--image" : ""}">${content}</div>`;
+  }
+
   /* -- product card HTML ----------------------------------------- */
   function cardHTML(p, opts = {}) {
     const isFeatured = !!opts.featured || (p.featured && opts.allowFeatured !== false);
@@ -31,10 +42,6 @@
     const badge = p.badge
       ? `<span class="badge ${p.badge.kind === "reserve" ? "badge--reserve" : "badge--featured"}">${p.badge.text}</span>`
       : "";
-    const isUltimate = p.art.kind === "ultimate";
-    const artInner = isUltimate
-      ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
-      : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
     const desc = p.short ? `<p class="product-card__desc">${p.short}</p>` : "";
 
     return `
@@ -42,7 +49,7 @@
       <a class="product-card__media-link" href="product.html?id=${p.id}" aria-label="${p.name}">
         <div class="product-card__media">
           ${badge}
-          <div class="product-art product-art--${p.art.kind}">${artInner}</div>
+          ${productArtHTML(p)}
         </div>
       </a>
       <div class="product-card__body">
@@ -146,10 +153,6 @@
       crumbCatEl.href = `category.html?cat=${p.cat}`;
     }
 
-    const isUltimate = p.art.kind === "ultimate";
-    const artInner = isUltimate
-      ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
-      : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
     const badge = p.badge
       ? `<span class="badge ${p.badge.kind === "reserve" ? "badge--reserve" : "badge--featured"}">${p.badge.text}</span>`
       : "";
@@ -160,7 +163,7 @@
       <div class="product-detail__grid">
         <div class="product-detail__media">
           ${badge}
-          <div class="product-art product-art--${p.art.kind}">${artInner}</div>
+          ${productArtHTML(p, { eager: true })}
         </div>
         <div class="product-detail__body">
           <span class="product-detail__cat">${cat ? cat.name : ""}</span>
@@ -300,14 +303,9 @@
       const p = window.LR_DATA.getProduct(it.id);
       if (!p) return "";
       const cat = window.LR_DATA.getCategory(p.cat);
-      const isUltimate = p.art.kind === "ultimate";
-      const artInner = isUltimate
-        ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
-        : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
-
       return `
       <div class="cart-row" data-cart-line="${p.id}">
-        <div class="cart-row__art product-art product-art--${p.art.kind}">${artInner}</div>
+        <div class="cart-row__art">${productArtHTML(p)}</div>
         <div>
           <div class="cart-row__cat">${cat ? cat.name : ""}</div>
           <a class="cart-row__name" href="product.html?id=${p.id}">${p.name}</a>

@@ -482,10 +482,13 @@
         body.innerHTML = items.map((it) => {
           const p = window.LR_DATA.getProduct(it.id);
           if (!p) return "";
+          const cartArt = p.image
+            ? `<img class="product-art__image" src="${p.image}" alt="${p.name}" loading="lazy" decoding="async">`
+            : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? 'game' : 'legend'}">${l}</span>`).join("");
           return `
             <div class="cart-line" data-cart-line="${p.id}">
-              <div class="cart-line__art product-art product-art--${p.art.kind}">
-                ${p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? 'game' : 'legend'}">${l}</span>`).join("")}
+              <div class="cart-line__art">
+                <div class="product-art product-art--${p.art.kind}${p.image ? " product-art--image" : ""}">${cartArt}</div>
               </div>
               <div class="cart-line__body">
                 <div class="cart-line__cat">${(window.LR_DATA.getCategory(p.cat)||{}).name||""}</div>
