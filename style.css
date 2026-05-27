@@ -58,3 +58,8 @@
   line-height: 1;
   cursor: pointer;
 }
+
+.nav-link.is-active {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
