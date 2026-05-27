@@ -59,6 +59,10 @@
   cursor: pointer;
 }
 
+.product-card[hidden] {
+  display: none !important;
+}
+
 .nav-link.is-active {
   pointer-events: auto !important;
   cursor: pointer !important;
