@@ -186,7 +186,7 @@
     },
     ps5Game({ id: "ps5-ai-apex",     name: "PS5 AI — Apex Legends",   upper: "APEX LEGENDS",  lines: ["APEX", "LEGENDS"],   price: 1426, image: "ps5-ai-apex.png" }),
     ps5Game({ id: "ps5-ai-cod",      name: "PS5 AI — Call of Duty",   upper: "CALL of DUTY",  lines: ["CALL", "OF DUTY"],   price: 1426, image: "ps5-ai-cod.png" }),
-    ps5Game({ id: "ps5-ai-valorant", name: "PS5 AI — Valorant",       upper: "VALORANT",      lines: ["VALORANT"],          price: 1426 }),
+    ps5Game({ id: "ps5-ai-valorant", name: "PS5 AI — Valorant",       upper: "VALORANT",      lines: ["VALORANT"],          price: 1426, image: "ps5-ai-valorant.png" }),
     ps5Game({ id: "ps5-ai-overwatch",name: "PS5 AI — Overwatch",      upper: "OVERWATCH",     lines: ["OVER", "WATCH"],     price: 1426, image: "ps5-ai-overwatch.png" }),
     ps5Game({ id: "ps5-ai-fortnite", name: "PS5 AI — Fortnite",       upper: "FORTNITE",      lines: ["FORT", "NITE"],      price: 1500, image: "ps5-ai-fortnite.png" }),
     ps5Game({ id: "ps5-ai-arc",      name: "PS5 AI — ARC Raiders",    upper: "ARC RAIDERS",   lines: ["ARC", "RAIDERS"],    price: 1426, image: "ps5-ai-arc.png" }),
