@@ -357,6 +357,24 @@ html[dir="ltr"] .nav-category__menu {
   cursor: pointer !important;
 }
 
+.products-grid > .product-card--featured:first-child {
+  grid-row: span 1 !important;
+}
+
+.products-grid > .product-card--featured:first-child .product-card__media {
+  aspect-ratio: 16 / 7.2 !important;
+}
+
+.products-grid > .product-card--featured:first-child .product-art__image {
+  object-fit: cover !important;
+  object-position: center top !important;
+}
+
+.products-grid > .product-card--featured:first-child .product-card__body {
+  padding-top: 18px !important;
+  padding-bottom: 18px !important;
+}
+
 @media (max-width: 640px) {
   .products-filter {
     width: 100%;
