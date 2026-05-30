@@ -418,3 +418,131 @@ html[dir="ltr"] .nav-category__menu {
     box-shadow: none;
   }
 }
+
+/* ============================================================
+   MOBILE & TABLET — Complete responsive improvements
+   ============================================================ */
+
+/* Tablet ≤ 900px -------------------------------------------- */
+@media (max-width: 900px) {
+  /* Cat tabs: horizontal scroll instead of multi-line wrap */
+  .cat-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-inline: calc(-1 * var(--section-pad-x));
+    padding-inline: var(--section-pad-x);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .cat-tabs::-webkit-scrollbar { display: none; }
+  .cat-tab { flex-shrink: 0; }
+}
+
+/* Tablet portrait only (641–900px) — featured card aspect ratio */
+@media (min-width: 641px) and (max-width: 900px) {
+  .products-grid > .product-card--featured:first-child .product-card__media {
+    aspect-ratio: 16 / 8 !important;
+  }
+}
+
+/* Mobile ≤ 640px — additive fixes --------------------------- */
+@media (max-width: 640px) {
+  /* Fix: full-width drawer (max-width:100%) must start completely off-screen.
+     The base style uses a fixed -460px offset which leaks on 460-640px screens. */
+  .cart-drawer {
+    inset-inline-end: -100vw;
+  }
+
+  /* Cart drawer footer: stack action buttons for comfortable thumb reach */
+  .cart-drawer__actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* iOS/Safari: prevent viewport auto-zoom on input focus.
+     Any font-size below 16px triggers the zoom. */
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px;
+  }
+
+  /* Product card: full-width primary button on small screens */
+  .product-card__actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* Breadcrumbs: allow wrapping when product path is long */
+  .breadcrumbs {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  /* Hero content: tighter left/right padding on narrow screens */
+  .hero-content {
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    padding-inline: var(--pad-x);
+    max-width: 100%;
+  }
+
+  /* Why cards: slightly smaller description text */
+  .why-card__desc {
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  /* Product detail trust items: single column on small screens */
+  .product-detail__trust {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Small phones ≤ 380px -------------------------------------- */
+@media (max-width: 380px) {
+  /* Prevent header overflow on 320-380px phones */
+  .brand-logo { width: 130px; }
+  .icon-btn { width: 32px; height: 32px; }
+
+  /* Compact section headings */
+  .section-title { font-size: 22px; }
+
+  /* Hero title: safe sizes for 320px phones */
+  .hero-title__line--top { font-size: 22px; }
+  .hero-title__line--bot { font-size: 30px; }
+  .hero-subtitle { font-size: 13.5px; }
+
+  /* Tighter hero title box */
+  .hero-title { padding: 12px 16px; }
+}
+
+/* Landscape phones ------------------------------------------ */
+/* Handles phones rotated to landscape where height < 500px.
+   Prevents the hero (min-height: 720px) from overflowing the viewport. */
+@media (max-height: 500px) and (min-width: 600px) and (orientation: landscape) {
+  .hero {
+    height: auto;
+    min-height: 0;
+    padding-top: calc(var(--header-h) + 36px);
+    padding-bottom: 40px;
+  }
+  .hero-content {
+    position: relative;
+    top: auto;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    transform: none;
+    max-width: 100%;
+    padding-inline: var(--pad-x);
+    padding-inline-end: var(--pad-x);
+    bottom: auto;
+  }
+  .hero-video { display: none; }
+  .hero-particles { display: none; }
+  .hero-title__line--top { font-size: 22px; }
+  .hero-title__line--bot { font-size: 30px; }
+  .hero-subtitle { display: none; }
+}
