@@ -19,7 +19,7 @@
     { href: "products.html#ps5", label: "PS5 AI" },
     { href: "products.html#setting", label: "Setting AI" },
     { href: "products.html#script", label: "Script Xim Matrix" },
-    { href: "products.html#accessories", label: "الملحقات" },
+    { href: "products.html#accessories", label: "Accessories" },
   ];
 
   /* ------------------------------------------------------------
@@ -157,20 +157,23 @@
      Header
      ------------------------------------------------------------ */
   function renderHeader() {
-    const categoryMenu = `
+    const categoryMenu = (label, isCurrent) => `
       <li class="nav-category" data-header-category-menu>
-        <button class="nav-link nav-link--button" type="button" aria-haspopup="true" aria-expanded="false" data-header-category-toggle>
-          تصنيفات
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg>
-        </button>
-        <div class="nav-category__menu" data-header-category-list hidden>
-          ${CATEGORY_LINKS.map((item) => `<a href="${item.href}" class="nav-category__item">${item.label}</a>`).join("")}
-        </div>
+        <details class="nav-category__details" data-header-category-details>
+          <summary class="nav-link nav-link--button${isCurrent ? " is-active" : ""}" aria-haspopup="true" aria-expanded="false" data-header-category-toggle>
+            ${label}
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg>
+          </summary>
+          <div class="nav-category__menu" data-header-category-list>
+            ${CATEGORY_LINKS.map((item) => `<a href="${item.href}" class="nav-category__item">${item.label}</a>`).join("")}
+          </div>
+        </details>
       </li>`;
 
     const links = NAV.map((n) => {
+      if (n.href === "products.html") return categoryMenu(n.label, isActive(n.href));
       const link = `<li><a href="${n.href}" class="nav-link${isActive(n.href) ? " is-active" : ""}" data-nav-link>${n.label}</a></li>`;
-      return n.href === "products.html" ? link + categoryMenu : link;
+      return link;
     }).join("");
 
     return `
@@ -281,7 +284,7 @@
             <li><a href="category.html?cat=ps5">PS5 AI</a></li>
             <li><a href="category.html?cat=setting">Setting AI</a></li>
             <li><a href="category.html?cat=script">Script Xim Matrix</a></li>
-            <li><a href="category.html?cat=accessories">الملحقات</a></li>
+            <li><a href="category.html?cat=accessories">Accessories</a></li>
           </ul>
         </div>
 
@@ -337,18 +340,20 @@
     document.querySelectorAll("[data-year]").forEach((el) => el.textContent = new Date().getFullYear());
 
     const categoryRoot = document.querySelector("[data-header-category-menu]");
+    const categoryDetails = document.querySelector("[data-header-category-details]");
     const categoryToggle = document.querySelector("[data-header-category-toggle]");
     const categoryList = document.querySelector("[data-header-category-list]");
     const closeCategoryMenu = () => {
-      if (!categoryToggle || !categoryList) return;
-      categoryList.hidden = true;
+      if (!categoryToggle || !categoryDetails) return;
+      categoryDetails.open = false;
       categoryToggle.setAttribute("aria-expanded", "false");
     };
-    if (categoryRoot && categoryToggle && categoryList) {
-      categoryToggle.addEventListener("click", () => {
-        const willOpen = categoryList.hidden;
-        categoryList.hidden = !willOpen;
-        categoryToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    if (categoryRoot && categoryDetails && categoryToggle && categoryList) {
+      categoryToggle.addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      categoryDetails.addEventListener("toggle", () => {
+        categoryToggle.setAttribute("aria-expanded", categoryDetails.open ? "true" : "false");
       });
       categoryList.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeCategoryMenu));
       document.addEventListener("click", (event) => {

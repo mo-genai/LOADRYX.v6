@@ -222,6 +222,18 @@
   position: relative;
 }
 
+.nav-category__details {
+  position: relative;
+}
+
+.nav-category__details summary {
+  list-style: none;
+}
+
+.nav-category__details summary::-webkit-details-marker {
+  display: none;
+}
+
 .nav-link--button {
   border: 0;
   background: transparent;
@@ -239,6 +251,10 @@
 }
 
 .nav-link--button[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.nav-category__details[open] .nav-link--button svg {
   transform: rotate(180deg);
 }
 
