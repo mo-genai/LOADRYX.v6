@@ -24,15 +24,36 @@
     arrow: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>`,
   };
 
+  function productImages(p) {
+    if (Array.isArray(p.images) && p.images.length) return p.images;
+    return p.image ? [p.image] : [];
+  }
+
+  function primaryImage(p) {
+    return productImages(p)[0] || null;
+  }
+
   function productArtHTML(p, opts = {}) {
     const isUltimate = p.art.kind === "ultimate";
-    const content = p.image
-      ? `<img class="product-art__image" src="${p.image}" alt="${p.name}" loading="${opts.eager ? "eager" : "lazy"}" decoding="async">`
+    const image = primaryImage(p);
+    const content = image
+      ? `<img class="product-art__image" src="${image}" alt="${p.name}" loading="${opts.eager ? "eager" : "lazy"}" decoding="async">`
       : isUltimate
         ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
         : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
 
-    return `<div class="product-art product-art--${p.art.kind}${p.image ? " product-art--image" : ""}">${content}</div>`;
+    return `<div class="product-art product-art--${p.art.kind}${image ? " product-art--image" : ""}">${content}</div>`;
+  }
+
+  function productGalleryHTML(p) {
+    const images = productImages(p);
+    if (images.length < 2) return "";
+    return `<div class="product-gallery" aria-label="صور المنتج">
+      ${images.map((src, i) => `
+        <button class="product-gallery__thumb${i === 0 ? " is-active" : ""}" type="button" data-product-thumb="${src}" aria-label="عرض صورة ${i + 1}">
+          <img src="${src}" alt="" loading="lazy" decoding="async">
+        </button>`).join("")}
+      </div>`;
   }
 
   /* -- product card HTML ----------------------------------------- */
@@ -164,6 +185,7 @@
         <div class="product-detail__media">
           ${badge}
           ${productArtHTML(p, { eager: true })}
+          ${productGalleryHTML(p)}
         </div>
         <div class="product-detail__body">
           <span class="product-detail__cat">${cat ? cat.name : ""}</span>
@@ -233,6 +255,18 @@
         if (isNaN(v) || v < 1) v = 1;
         if (v > 99) v = 99;
         input.value = v; sync();
+      });
+    }
+
+    const media = host.querySelector(".product-detail__media");
+    const mainImage = media ? media.querySelector(".product-art__image") : null;
+    const thumbs = media ? Array.from(media.querySelectorAll("[data-product-thumb]")) : [];
+    if (mainImage && thumbs.length) {
+      thumbs.forEach((thumb) => {
+        thumb.addEventListener("click", () => {
+          mainImage.src = thumb.getAttribute("data-product-thumb");
+          thumbs.forEach((item) => item.classList.toggle("is-active", item === thumb));
+        });
       });
     }
   }

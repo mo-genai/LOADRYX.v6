@@ -35,6 +35,43 @@
   aspect-ratio: 16 / 9;
 }
 
+.product-gallery {
+  position: absolute;
+  inset-inline: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px;
+  background: rgba(2, 7, 13, .72);
+  border: 1px solid rgba(3,131,244,.28);
+  backdrop-filter: blur(10px);
+}
+
+.product-gallery__thumb {
+  width: 54px;
+  height: 38px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid rgba(154,163,170,.28);
+  background: #02070D;
+  cursor: pointer;
+  opacity: .72;
+}
+
+.product-gallery__thumb.is-active {
+  border-color: var(--blue);
+  opacity: 1;
+}
+
+.product-gallery__thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
 .lr-lightbox {
   position: fixed;
   inset: 0;

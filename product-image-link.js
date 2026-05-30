@@ -1,7 +1,12 @@
 window.addEventListener("load", function () {
   var params = new URLSearchParams(location.search);
   var product = window.LR_DATA && window.LR_DATA.getProduct(params.get("id"));
-  if (!product || !product.image) return;
+  var images = product && Array.isArray(product.images) && product.images.length
+    ? product.images
+    : product && product.image
+      ? [product.image]
+      : [];
+  if (!product || !images.length) return;
 
   var media = document.querySelector(".product-detail__media");
   if (!media) return;
@@ -13,7 +18,8 @@ window.addEventListener("load", function () {
     box.className = "lr-lightbox";
 
     var img = document.createElement("img");
-    img.src = product.image;
+    var current = media.querySelector(".product-art__image");
+    img.src = current ? current.getAttribute("src") : images[0];
     img.alt = product.name;
 
     var close = document.createElement("button");

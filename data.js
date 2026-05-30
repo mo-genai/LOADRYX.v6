@@ -253,6 +253,8 @@
       title: "WARZONE PRO SCRIPT",
       art: { kind: "script", lines: ["SCRIPT", "WARZONE"] },
       price: 200,
+      image: "warzone_script.png",
+      images: ["warzone_script.png"],
       short: "Aim Assist متطور، ثبات عالٍ، إعدادات احترافية متوافقة مع جميع المنصات.",
       intro: "سكربت احترافي مصمم خصيصاً ليمنحك أفضل أداء وثبات في التصويب داخل لعبة Warzone. متوافق مع جميع المنصات: PC، PS5، PS4، Xbox — ويعمل بسلاسة لأفضل تجربة لعب ممكنة.",
       sections: [
@@ -286,6 +288,8 @@
       title: "BLACK OPS 7 DMA SCRIPT",
       art: { kind: "script", lines: ["BLACK OPS 7", "DMA"] },
       price: 150,
+      image: "script-bo7-dma.png",
+      images: ["script-bo7-dma.png"],
       short: "قراءة بيانات لعبة متقدمة عبر الـ DMA لتجربة احترافية متكاملة.",
       intro: "سكربت Black Ops 7 الاحترافي — نوع من الأدوات والإعدادات المتقدمة المستخدمة مع الأجهزة الخارجية لتحسين قراءة بيانات اللعبة بشكل مباشر عبر الـ PC، يستخدمه اللاعبون التنافسيون للحصول على معلومات إضافية أثناء اللعب.",
       sections: [
@@ -299,6 +303,7 @@
           ],
         },
       ],
+      sections: [],
     },
 
     /* ----- Accessories ----------------------------------------- */
@@ -327,6 +332,47 @@
           note: "هذا المنتج متاح للحجز المسبق فقط — يتم التواصل معك عند توفّر الكمية.",
         },
       ],
+      image: "titan-two.png",
+      images: ["titan-two.png"],
+      short: "يأتي Titan Two كجهاز Adapter متقدم يدعم البرمجة والـ Mods، ومخصص للاعبين الذين يحتاجون تحكماً أوسع على أجهزة الكونسول والكمبيوتر.",
+      intro: "يأتي Titan Two كجهاز Adapter متقدم يدعم البرمجة والـ Mods، ومخصص للاعبين الذين يحتاجون تحكماً أوسع على أجهزة الكونسول والكمبيوتر.",
+      sections: [
+        {
+          heading: "إمكانية الاستخدام",
+          items: [
+            "يد التحكم المفضلة لديك",
+            "الكيبورد والماوس",
+            "الجويستك",
+            "Arcade Stick",
+            "Flight Stick",
+            "ومعظم وحدات التحكم المختلفة",
+          ],
+        },
+        {
+          heading: "التوافق",
+          note: "يعمل على أجهزة الكونسول والكمبيوتر بسلاسة.",
+        },
+        {
+          heading: "تخصيص كامل",
+          items: [
+            "يمكنك تعديل توزيع الأزرار",
+            "حساسية وتحركات الأنالوج",
+            "وإعدادات التحكم بالكامل بما يناسب أسلوب لعبك.",
+          ],
+        },
+        {
+          heading: "خصائص التحكم",
+          items: ["يدعم Titan Two مجموعة من أدوات التحكم المتقدمة، مثل:", "Mods", "Macros", "Rapid Fire", "Anti-Recoil", "Aim Assist"],
+        },
+        {
+          heading: "دعم XIM APEX",
+          note: "يدعم Titan Two جهاز XIM APEX Mouse & Keyboard Adapter.",
+        },
+        {
+          heading: "ملاحظة",
+          note: "هذا المنتج متاح للحجز المسبق فقط - يتم التواصل معك عند توفر الكمية.",
+        },
+      ],
     },
     {
       id: "brook-wingman-fgc2",
@@ -348,6 +394,17 @@
           ],
         },
       ],
+      image: "brook-wingman-fgc2.png",
+      images: [
+        "brook-wingman-fgc2.png",
+        "brook-wingman-fgc2.2.png",
+        "brook-wingman-fgc2.3.png",
+        "brook-wingman-fgc2.4.png",
+        "brook-wingman-fgc2.5.png",
+      ],
+      short: "محول عصا التحكم Arcade لدعم PS5 والكمبيوتر الشخصي.",
+      intro: "محول Brook Wingman FGC2 - محول عصا التحكم Arcade لدعم PS5 والكمبيوتر الشخصي.",
+      sections: [],
     },
     {
       id: "p5-general",
@@ -364,6 +421,13 @@
           items: ["متوافق مع PS5", "تركيب بسيط", "أداء مستقر"],
         },
       ],
+      name: "p5 general",
+      title: "P5 GENERAL",
+      image: "p5-general.png",
+      images: ["p5-general.png", "p5-general.2.png", "p5-general.3.png", "p5-general.4.png"],
+      short: "منشط ألعاب PS5 من الجيل الثاني بتردد 1000 هرتز ثنائي الاتجاه.",
+      intro: "منشط ألعاب PS5 من الجيل الثاني بتردد 1000 هرتز ثنائي الاتجاه<br>يدعم HITBOX لـ Raspberry Pi COLOR MATRIX Reasnow وطرفين خارجيين آخرين<br><br>(قد تختلف الكلمات المطبوعة على المنتج حسب الدفعة، ولكن ذلك لا يؤثر على الاستخدام)<br>اللون أسود<br>المادة بلاستيك<br><br>محتويات العبوة<br>منفذ USB لجهاز P5General لتفعيل ألعاب PS5<br><br>فقط محتوى الحزمة أعلاه، لا يتم تضمين المنتجات الأخرى.<br><br>ملاحظة: قد يؤدي انعكاس الضوء واختلاف شاشات العرض إلى اختلاف بسيط في لون العنصر الظاهر في الصورة مقارنة باللون الفعلي. هامش الخطأ المسموح به في القياسات هو +- 1-3 سم.",
+      sections: [],
     },
   ];
 
