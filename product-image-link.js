@@ -13,13 +13,21 @@ window.addEventListener("load", function () {
 
   media.style.cursor = "zoom-in";
 
-  media.onclick = function () {
+  media.addEventListener("click", function (event) {
+    if (event.target.closest("button")) return;
+    var clickedImage = event.target.closest(".product-art__image, .product-gallery__thumb img");
+    if (!clickedImage) return;
+
     var box = document.createElement("div");
     box.className = "lr-lightbox";
 
     var img = document.createElement("img");
     var current = media.querySelector(".product-art__image");
-    img.src = current ? current.getAttribute("src") : images[0];
+    img.src = clickedImage.classList.contains("product-art__image")
+      ? clickedImage.getAttribute("src")
+      : current
+        ? current.getAttribute("src")
+        : images[0];
     img.alt = product.name;
 
     var close = document.createElement("button");
@@ -47,5 +55,5 @@ window.addEventListener("load", function () {
     box.appendChild(close);
     document.body.appendChild(box);
     document.body.style.overflow = "hidden";
-  };
+  });
 });

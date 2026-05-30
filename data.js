@@ -36,7 +36,7 @@
     {
       slug: "games",
       name: "الألعاب",
-      tagline: "قسم الألعاب — قريباً",
+      tagline: "قسم الألعاب",
       desc: "نعمل على إضافة منتجات هذا القسم. تابعنا لآخر التحديثات.",
     },
   ];
@@ -430,6 +430,13 @@
       sections: [],
     },
   ];
+
+  PRODUCTS.forEach((product) => {
+    const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    if (!images.length && product.image) images.push(product.image);
+    product.images = images;
+    if (!product.image && images.length) product.image = images[0];
+  });
 
   /* -- helpers --------------------------------------------------- */
   function getCategory(slug) {

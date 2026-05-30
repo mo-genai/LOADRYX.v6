@@ -29,17 +29,20 @@
 
     <section class="section section--deep">
       <div class="section-inner">
-        <nav class="cat-tabs" aria-label="فلترة الفئة" style="margin-bottom:32px;">
-          <a class="cat-tab is-active" href="#all" data-products-filter="all">
-            <span class="cat-tab__name">الكل</span>
-            <span class="cat-tab__count" data-count-all></span>
-          </a>
-          <a class="cat-tab" href="#ps5" data-products-filter="ps5"><span class="cat-tab__name">PS5 AI</span><span class="cat-tab__count">7 منتجات</span></a>
-          <a class="cat-tab" href="#setting" data-products-filter="setting"><span class="cat-tab__name">Setting AI</span><span class="cat-tab__count">منتجان</span></a>
-          <a class="cat-tab" href="#script" data-products-filter="script"><span class="cat-tab__name">Script Xim Matrix</span><span class="cat-tab__count">منتجان</span></a>
-          <a class="cat-tab" href="#accessories" data-products-filter="accessories"><span class="cat-tab__name">الملحقات</span><span class="cat-tab__count">3 منتجات</span></a>
-          <a class="cat-tab" href="#games" data-products-filter="games"><span class="cat-tab__name">الألعاب</span><span class="cat-tab__count">قريباً</span></a>
-        </nav>
+        <div class="products-filter" data-products-filter-root>
+          <button class="products-filter__toggle" type="button" aria-expanded="false" data-products-filter-toggle>
+            <span>تصنيفات</span>
+            <strong data-products-filter-label>جميع المنتجات</strong>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg>
+          </button>
+          <div class="products-filter__menu" data-products-filter-menu hidden>
+            <button class="products-filter__option is-active" type="button" data-products-filter="all">جميع المنتجات</button>
+            <button class="products-filter__option" type="button" data-products-filter="ps5">PS5 AI</button>
+            <button class="products-filter__option" type="button" data-products-filter="setting">Setting AI</button>
+            <button class="products-filter__option" type="button" data-products-filter="script">Script Xim Matrix</button>
+            <button class="products-filter__option" type="button" data-products-filter="accessories">الملحقات</button>
+          </div>
+        </div>
 
         <div data-all-products></div>
       </div>
@@ -57,32 +60,54 @@
       const initFilters = () => {
         if (!window.LR_DATA) return setTimeout(initFilters, 30);
 
-        const countEl = document.querySelector("[data-count-all]");
-        if (countEl) countEl.textContent = window.LR_DATA.PRODUCTS.length + " منتج";
-
         const host = document.querySelector("[data-all-products]");
         const cards = host ? Array.from(host.querySelectorAll(".product-card")) : [];
         if (!host || cards.length === 0) return setTimeout(initFilters, 30);
 
-        cards.forEach((card, index) => {
-          const product = window.LR_DATA.PRODUCTS[index];
-          if (product) card.setAttribute("data-product-cat", product.cat);
-        });
-
         if (initialized) return;
         initialized = true;
 
+        const filterRoot = document.querySelector("[data-products-filter-root]");
+        const toggle = document.querySelector("[data-products-filter-toggle]");
+        const menu = document.querySelector("[data-products-filter-menu]");
+        const label = document.querySelector("[data-products-filter-label]");
         const tabs = document.querySelectorAll("[data-products-filter]");
+        const filterNames = {
+          all: "جميع المنتجات",
+          ps5: "PS5 AI",
+          setting: "Setting AI",
+          script: "Script Xim Matrix",
+          accessories: "الملحقات",
+        };
+        const closeMenu = () => {
+          if (!menu || !toggle) return;
+          menu.hidden = true;
+          toggle.setAttribute("aria-expanded", "false");
+        };
+        const openMenu = () => {
+          if (!menu || !toggle) return;
+          menu.hidden = false;
+          toggle.setAttribute("aria-expanded", "true");
+        };
         const filterProducts = (cat) => {
+          const activeCat = filterNames[cat] ? cat : "all";
           host.querySelectorAll(".product-card").forEach((card) => {
-            const show = cat === "all" || card.getAttribute("data-product-cat") === cat;
+            const show = activeCat === "all" || card.getAttribute("data-product-cat") === activeCat;
             card.hidden = !show;
           });
 
           tabs.forEach((tab) => {
-            tab.classList.toggle("is-active", tab.getAttribute("data-products-filter") === cat);
+            tab.classList.toggle("is-active", tab.getAttribute("data-products-filter") === activeCat);
           });
+          if (label) label.textContent = filterNames[activeCat];
         };
+
+        if (toggle) {
+          toggle.addEventListener("click", () => {
+            if (!menu) return;
+            menu.hidden ? openMenu() : closeMenu();
+          });
+        }
 
         tabs.forEach((tab) => {
           tab.addEventListener("click", (event) => {
@@ -90,7 +115,16 @@
             const cat = tab.getAttribute("data-products-filter") || "all";
             history.replaceState(null, "", cat === "all" ? "products.html" : "#" + cat);
             filterProducts(cat);
+            closeMenu();
           });
+        });
+
+        document.addEventListener("click", (event) => {
+          if (filterRoot && !filterRoot.contains(event.target)) closeMenu();
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closeMenu();
         });
 
         const initialCat = location.hash ? location.hash.replace("#", "") : "all";

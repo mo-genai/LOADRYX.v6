@@ -22,6 +22,8 @@
   const SVG = {
     cart: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2.2l2 11.2A2 2 0 0 0 10.2 18h7.6a2 2 0 0 0 2-1.7l1.3-7.3H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/><circle cx="10" cy="21" r="1.2" fill="currentColor"/><circle cx="18" cy="21" r="1.2" fill="currentColor"/></svg>`,
     arrow: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>`,
+    galleryPrev: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></svg>`,
+    galleryNext: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></svg>`,
   };
 
   function productImages(p) {
@@ -50,7 +52,7 @@
     if (images.length < 2) return "";
     return `<div class="product-gallery" aria-label="صور المنتج">
       ${images.map((src, i) => `
-        <button class="product-gallery__thumb${i === 0 ? " is-active" : ""}" type="button" data-product-thumb="${src}" aria-label="عرض صورة ${i + 1}">
+        <button class="product-gallery__thumb${i === 0 ? " is-active" : ""}" type="button" data-product-thumb="${src}" data-product-thumb-index="${i}" aria-label="عرض صورة ${i + 1}">
           <img src="${src}" alt="" loading="lazy" decoding="async">
         </button>`).join("")}
       </div>`;
@@ -66,7 +68,7 @@
     const desc = p.short ? `<p class="product-card__desc">${p.short}</p>` : "";
 
     return `
-    <article class="product-card${isFeatured ? " product-card--featured" : ""}" data-reveal>
+    <article class="product-card${isFeatured ? " product-card--featured" : ""}" data-reveal data-product-cat="${p.cat}">
       <a class="product-card__media-link" href="product.html?id=${p.id}" aria-label="${p.name}">
         <div class="product-card__media">
           ${badge}
@@ -182,13 +184,19 @@
 
     host.innerHTML = `
       <div class="product-detail__grid">
-        <div class="product-detail__media">
-          ${badge}
-          ${productArtHTML(p, { eager: true })}
+        <div class="product-detail__media" data-product-gallery-root>
+          <div class="product-media__stage">
+            ${badge}
+            ${productArtHTML(p, { eager: true })}
+            ${productImages(p).length > 1 ? `
+              <button class="product-gallery__arrow product-gallery__arrow--prev" type="button" data-gallery-prev aria-label="الصورة السابقة">${SVG.galleryPrev}</button>
+              <button class="product-gallery__arrow product-gallery__arrow--next" type="button" data-gallery-next aria-label="الصورة التالية">${SVG.galleryNext}</button>
+            ` : ""}
+          </div>
           ${productGalleryHTML(p)}
         </div>
         <div class="product-detail__body">
-          <span class="product-detail__cat">${cat ? cat.name : ""}</span>
+          <a class="product-detail__cat" href="products.html#${p.cat}">${cat ? cat.name : ""}</a>
           <h1 class="product-detail__title">${p.name}</h1>
 
           <div class="product-detail__price-row">
@@ -258,16 +266,24 @@
       });
     }
 
-    const media = host.querySelector(".product-detail__media");
+    const media = host.querySelector("[data-product-gallery-root]");
     const mainImage = media ? media.querySelector(".product-art__image") : null;
     const thumbs = media ? Array.from(media.querySelectorAll("[data-product-thumb]")) : [];
     if (mainImage && thumbs.length) {
-      thumbs.forEach((thumb) => {
-        thumb.addEventListener("click", () => {
-          mainImage.src = thumb.getAttribute("data-product-thumb");
-          thumbs.forEach((item) => item.classList.toggle("is-active", item === thumb));
-        });
+      let activeIndex = 0;
+      const setActiveImage = (nextIndex) => {
+        activeIndex = (nextIndex + thumbs.length) % thumbs.length;
+        const thumb = thumbs[activeIndex];
+        mainImage.src = thumb.getAttribute("data-product-thumb");
+        thumbs.forEach((item, index) => item.classList.toggle("is-active", index === activeIndex));
+      };
+      thumbs.forEach((thumb, index) => {
+        thumb.addEventListener("click", () => setActiveImage(index));
       });
+      const prev = media.querySelector("[data-gallery-prev]");
+      const next = media.querySelector("[data-gallery-next]");
+      if (prev) prev.addEventListener("click", () => setActiveImage(activeIndex - 1));
+      if (next) next.addEventListener("click", () => setActiveImage(activeIndex + 1));
     }
   }
 
