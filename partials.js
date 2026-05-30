@@ -6,12 +6,20 @@
 (function () {
   "use strict";
 
-  /* Simple nav — categories live inside /products.html, not the header */
+  /* Simple nav */
   const NAV = [
     { href: "index.html",     label: "الرئيسية" },
     { href: "products.html",  label: "المنتجات" },
     { href: "faq.html",       label: "الأسئلة الشائعة" },
     { href: "contact.html",   label: "تواصل معنا" },
+  ];
+
+  const CATEGORY_LINKS = [
+    { href: "products.html", label: "جميع المنتجات" },
+    { href: "products.html#ps5", label: "PS5 AI" },
+    { href: "products.html#setting", label: "Setting AI" },
+    { href: "products.html#script", label: "Script Xim Matrix" },
+    { href: "products.html#accessories", label: "الملحقات" },
   ];
 
   /* ------------------------------------------------------------
@@ -149,9 +157,21 @@
      Header
      ------------------------------------------------------------ */
   function renderHeader() {
-    const links = NAV.map((n) => `
-      <li><a href="${n.href}" class="nav-link${isActive(n.href) ? " is-active" : ""}" data-nav-link>${n.label}</a></li>
-    `).join("");
+    const categoryMenu = `
+      <li class="nav-category" data-header-category-menu>
+        <button class="nav-link nav-link--button" type="button" aria-haspopup="true" aria-expanded="false" data-header-category-toggle>
+          تصنيفات
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg>
+        </button>
+        <div class="nav-category__menu" data-header-category-list hidden>
+          ${CATEGORY_LINKS.map((item) => `<a href="${item.href}" class="nav-category__item">${item.label}</a>`).join("")}
+        </div>
+      </li>`;
+
+    const links = NAV.map((n) => {
+      const link = `<li><a href="${n.href}" class="nav-link${isActive(n.href) ? " is-active" : ""}" data-nav-link>${n.label}</a></li>`;
+      return n.href === "products.html" ? link + categoryMenu : link;
+    }).join("");
 
     return `
     <header class="site-header" role="banner">
@@ -315,6 +335,62 @@
     document.querySelectorAll("[data-pay-showcase]").forEach((el) => el.innerHTML = paymentShowcase());
 
     document.querySelectorAll("[data-year]").forEach((el) => el.textContent = new Date().getFullYear());
+
+    const categoryRoot = document.querySelector("[data-header-category-menu]");
+    const categoryToggle = document.querySelector("[data-header-category-toggle]");
+    const categoryList = document.querySelector("[data-header-category-list]");
+    const closeCategoryMenu = () => {
+      if (!categoryToggle || !categoryList) return;
+      categoryList.hidden = true;
+      categoryToggle.setAttribute("aria-expanded", "false");
+    };
+    if (categoryRoot && categoryToggle && categoryList) {
+      categoryToggle.addEventListener("click", () => {
+        const willOpen = categoryList.hidden;
+        categoryList.hidden = !willOpen;
+        categoryToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      });
+      categoryList.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeCategoryMenu));
+      document.addEventListener("click", (event) => {
+        if (!categoryRoot.contains(event.target)) closeCategoryMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeCategoryMenu();
+      });
+    }
+
+    const navEl = document.getElementById("primary-nav");
+    const openBtn = document.querySelector("[data-menu-open]");
+    const closeBtn = document.querySelector("[data-menu-close]");
+    if (navEl && openBtn && !openBtn.dataset.menuBound) {
+      openBtn.dataset.menuBound = "true";
+      let backdrop = document.querySelector(".menu-backdrop");
+      if (!backdrop) {
+        backdrop = document.createElement("div");
+        backdrop.className = "menu-backdrop";
+        document.body.appendChild(backdrop);
+      }
+      const openMenu = () => {
+        navEl.classList.add("is-open");
+        backdrop.classList.add("is-open");
+        document.body.classList.add("is-menu-open");
+      };
+      const closeMenu = () => {
+        navEl.classList.remove("is-open");
+        backdrop.classList.remove("is-open");
+        document.body.classList.remove("is-menu-open");
+        closeCategoryMenu();
+      };
+      openBtn.addEventListener("click", openMenu);
+      if (closeBtn) closeBtn.addEventListener("click", closeMenu);
+      backdrop.addEventListener("click", closeMenu);
+      navEl.addEventListener("click", (event) => {
+        if (event.target.closest("a")) closeMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeMenu();
+      });
+    }
   }
 
   if (document.readyState === "loading") {
