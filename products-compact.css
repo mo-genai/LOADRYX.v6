@@ -1,0 +1,18 @@
+/* Compact the first featured product card on the products page only. */
+.products-grid > .product-card--featured:first-child {
+  grid-row: span 1;
+}
+
+.products-grid > .product-card--featured:first-child .product-card__media {
+  aspect-ratio: 16 / 7.2;
+}
+
+.products-grid > .product-card--featured:first-child .product-art__image {
+  object-fit: cover;
+  object-position: center top;
+}
+
+.products-grid > .product-card--featured:first-child .product-card__body {
+  padding-top: 18px;
+  padding-bottom: 18px;
+}

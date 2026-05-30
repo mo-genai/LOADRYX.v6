@@ -1,8 +1,10 @@
 /* ============================================================
    LOADRYX — main script
-   - Hero proximity headline (transform-only, GPU, zero reflow)
-   - Canvas particles (proofcore-inspired: sparse + connections)
-   - Cart drawer + page-level cart sync
+   - Tactical Signal Field canvas (grid + nodes + pings + crosshair)
+   - HUD headline (3D tilt + continuous scan line, transform-only)
+   - Section indicator: clickable smooth-scroll dots
+   - Right-click disable on hero media
+   - Cart drawer + counter sync
    - Mobile menu, smooth scroll, scroll-spy, accordion, reveal
    - Header scroll state
    ============================================================ */
@@ -14,7 +16,7 @@
   const isCoarse      = window.matchMedia("(pointer: coarse)").matches;
 
   /* ============================================================
-     1. Hero video error fallback
+     1. Hero video — autoplay attempt + error fallback + no-save
      ============================================================ */
   const videoMedia = document.querySelector(".hero-media");
   const heroVideo  = document.querySelector(".hero-video");
@@ -25,202 +27,247 @@
     const p = heroVideo.play();
     if (p && typeof p.catch === "function") p.catch(() => {});
 
-    // يمنع خراب تموضع الفيديو عند فتح/إغلاق DevTools أو تغيير حجم النافذة
-    let mediaResizeTimer = 0;
-    const repaintHeroVideo = () => {
-      clearTimeout(mediaResizeTimer);
-      mediaResizeTimer = setTimeout(() => {
-        videoMedia.style.transform = "translateZ(0)";
-        heroVideo.style.transform = getComputedStyle(heroVideo).transform;
-        requestAnimationFrame(() => {
-          videoMedia.style.transform = "";
-          heroVideo.style.transform = "";
-          if (heroVideo.paused) {
-            const play = heroVideo.play();
-            if (play && typeof play.catch === "function") play.catch(() => {});
-          }
-        });
-      }, 140);
-    };
-    window.addEventListener("resize", repaintHeroVideo, { passive: true });
-    window.addEventListener("orientationchange", repaintHeroVideo, { passive: true });
+    // disable context menu / drag on the hero media to discourage saving
+    const noMenu = (e) => e.preventDefault();
+    videoMedia.addEventListener("contextmenu", noMenu);
+    heroVideo.addEventListener("contextmenu", noMenu);
+    const fb = document.querySelector(".hero-fallback");
+    if (fb) {
+      fb.addEventListener("contextmenu", noMenu);
+      fb.addEventListener("dragstart", noMenu);
+    }
+    heroVideo.setAttribute("controlslist", "nodownload noplaybackrate noremoteplayback");
+    heroVideo.setAttribute("disablepictureinpicture", "");
   }
 
   /* ============================================================
-     2. Canvas particles — proofcore-inspired (sparse + soft)
-     - small particles, soft blue
-     - optional thin connection lines for very close pairs
-     - light mouse parallax
-     - rAF capped to 60fps, paused on visibility hidden
+     2. TACTICAL SIGNAL FIELD — canvas
+     A premium tactical/HUD background:
+     - faint grid
+     - fixed node points
+     - occasional signal pings expanding from nodes
+     - faint connection lines between close nodes
+     - smooth crosshair tracker following the mouse
+     All transform/draw-only, capped at ~60fps, paused on hidden tab.
      ============================================================ */
   const canvas = document.getElementById("hero-particles");
   if (canvas && !reducedMotion) {
     const ctx = canvas.getContext("2d", { alpha: true });
     let w = 0, h = 0, dpr = 1;
-    let particles = [];
-    let mx = -9999, my = -9999;
-    let rafId = 0;
-    let running = true;
-    let lastT = 0;
+    let nodes = [];
+    let pings = [];
+    let rafId = 0, running = true, lastT = 0;
+    let mx = -9999, my = -9999, tmx = -9999, tmy = -9999;
+    let lastPingAt = 0;
 
-    const BASE_COLOR = "3, 131, 244";   // matches --blue
-    const TARGET_DENSITY = 1 / 22000;   // particles per px²
+    const GRID_SIZE = 64;
+    const GRID_ALPHA = 0.045;
+    const NODE_COUNT_TARGET = 14;
+    const PING_LIFESPAN = 2200;       // ms
+    const PING_MAX_R = 110;            // px
+    const CONN_MAX = 170;              // px
+    const CONN_MAX_SQ = CONN_MAX * CONN_MAX;
+    const PING_INTERVAL = [900, 2200]; // ms range between pings
 
     function resize() {
       const rect = canvas.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = rect.width;
-      h = rect.height;
+      w = rect.width; h = rect.height;
       canvas.width  = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      build();
+      buildNodes();
     }
 
-    function build() {
-      const count = Math.max(18, Math.min(Math.round(w * h * TARGET_DENSITY), 56));
-      particles = new Array(count);
-      for (let i = 0; i < count; i++) {
-        particles[i] = {
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.10,
-          vy: (Math.random() - 0.5) * 0.10,
-          r: Math.random() * 0.9 + 0.5,
-          a: Math.random() * 0.28 + 0.10,
-        };
+    function buildNodes() {
+      // distribute nodes pseudo-evenly using a coarse 4×3 grid jitter
+      const cols = 5, rows = 3;
+      nodes = [];
+      const targetCount = Math.min(NODE_COUNT_TARGET, cols * rows);
+      const used = new Set();
+      while (nodes.length < targetCount) {
+        const c = Math.floor(Math.random() * cols);
+        const r = Math.floor(Math.random() * rows);
+        const key = `${c},${r}`;
+        if (used.has(key)) continue;
+        used.add(key);
+        const cellW = w / cols, cellH = h / rows;
+        nodes.push({
+          x: cellW * c + cellW * (0.25 + Math.random() * 0.5),
+          y: cellH * r + cellH * (0.25 + Math.random() * 0.5),
+          baseAlpha: 0.35 + Math.random() * 0.35,
+        });
       }
     }
 
-    function step(t) {
-      if (!running) { rafId = 0; return; }
-      // throttle to ~60fps
-      const dt = t - lastT;
-      if (dt < 14) { rafId = requestAnimationFrame(step); return; }
-      lastT = t;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // draw connection lines first (under dots)
-      const CONN_MAX = 110;
-      const CONN_MAX_SQ = CONN_MAX * CONN_MAX;
+    function drawGrid() {
+      ctx.strokeStyle = `rgba(3, 131, 244, ${GRID_ALPHA})`;
       ctx.lineWidth = 1;
-      for (let i = 0; i < particles.length; i++) {
-        const a = particles[i];
-        for (let j = i + 1; j < particles.length; j++) {
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
+      ctx.beginPath();
+      for (let x = (w / 2) % GRID_SIZE; x < w; x += GRID_SIZE) {
+        ctx.moveTo(x, 0); ctx.lineTo(x, h);
+      }
+      for (let y = (h / 2) % GRID_SIZE; y < h; y += GRID_SIZE) {
+        ctx.moveTo(0, y); ctx.lineTo(w, y);
+      }
+      ctx.stroke();
+    }
+
+    function drawConnections() {
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
           const d2 = dx * dx + dy * dy;
           if (d2 < CONN_MAX_SQ) {
             const k = 1 - d2 / CONN_MAX_SQ;
-            ctx.strokeStyle = `rgba(${BASE_COLOR}, ${(k * 0.07).toFixed(3)})`;
+            ctx.strokeStyle = `rgba(3, 131, 244, ${(k * 0.08).toFixed(3)})`;
+            ctx.lineWidth = 0.8;
             ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
+            ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
             ctx.stroke();
           }
         }
       }
+    }
 
-      // update + draw dots
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        // soft mouse repulsion
-        const dx = p.x - mx, dy = p.y - my;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < 9000) {
-          const f = (9000 - d2) / 9000 * 0.45;
-          const inv = 1 / Math.sqrt(d2 + 0.01);
-          p.x += dx * inv * f;
-          p.y += dy * inv * f;
-        }
-        // wrap
-        if (p.x < -4) p.x = w + 4; else if (p.x > w + 4) p.x = -4;
-        if (p.y < -4) p.y = h + 4; else if (p.y > h + 4) p.y = -4;
+    function drawNodes() {
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        // outer faint ring
+        ctx.strokeStyle = `rgba(3, 131, 244, ${(n.baseAlpha * 0.25).toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 3.5, 0, Math.PI * 2); ctx.stroke();
+        // inner solid dot
+        ctx.fillStyle = `rgba(3, 131, 244, ${n.baseAlpha.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${BASE_COLOR}, ${p.a.toFixed(3)})`;
-        ctx.fill();
+    function spawnPing(now) {
+      if (!nodes.length) return;
+      const n = nodes[Math.floor(Math.random() * nodes.length)];
+      pings.push({ x: n.x, y: n.y, t0: now });
+    }
+
+    function drawPings(now) {
+      for (let i = pings.length - 1; i >= 0; i--) {
+        const p = pings[i];
+        const t = (now - p.t0) / PING_LIFESPAN;
+        if (t >= 1) { pings.splice(i, 1); continue; }
+        // ease-out
+        const eased = 1 - Math.pow(1 - t, 2.4);
+        const r = eased * PING_MAX_R;
+        const a = (1 - t) * 0.55;
+        ctx.strokeStyle = `rgba(3, 131, 244, ${a.toFixed(3)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+
+    function drawCrosshair() {
+      // smooth-follow mouse
+      mx += (tmx - mx) * 0.18;
+      my += (tmy - my) * 0.18;
+      if (tmx < -1000) return;
+      const x = mx, y = my;
+
+      ctx.strokeStyle = "rgba(3, 131, 244, 0.55)";
+      ctx.lineWidth = 1;
+
+      // four small ticks around the cursor
+      const gap = 10, len = 12;
+      ctx.beginPath();
+      ctx.moveTo(x - gap - len, y); ctx.lineTo(x - gap, y);
+      ctx.moveTo(x + gap,        y); ctx.lineTo(x + gap + len, y);
+      ctx.moveTo(x, y - gap - len);  ctx.lineTo(x, y - gap);
+      ctx.moveTo(x, y + gap);        ctx.lineTo(x, y + gap + len);
+      ctx.stroke();
+
+      // tracking ring
+      ctx.strokeStyle = "rgba(3, 131, 244, 0.30)";
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.stroke();
+
+      // corner brackets (small offset square)
+      const b = 22, bl = 6;
+      ctx.strokeStyle = "rgba(3, 131, 244, 0.18)";
+      ctx.beginPath();
+      ctx.moveTo(x - b, y - b + bl); ctx.lineTo(x - b, y - b); ctx.lineTo(x - b + bl, y - b);
+      ctx.moveTo(x + b - bl, y - b); ctx.lineTo(x + b, y - b); ctx.lineTo(x + b, y - b + bl);
+      ctx.moveTo(x - b, y + b - bl); ctx.lineTo(x - b, y + b); ctx.lineTo(x - b + bl, y + b);
+      ctx.moveTo(x + b - bl, y + b); ctx.lineTo(x + b, y + b); ctx.lineTo(x + b, y + b - bl);
+      ctx.stroke();
+    }
+
+    function frame(t) {
+      if (!running) { rafId = 0; return; }
+      const dt = t - lastT;
+      if (dt < 14) { rafId = requestAnimationFrame(frame); return; }
+      lastT = t;
+
+      ctx.clearRect(0, 0, w, h);
+      drawGrid();
+      drawConnections();
+      drawPings(t);
+      drawNodes();
+      drawCrosshair();
+
+      // schedule next ping
+      if (t > lastPingAt) {
+        spawnPing(t);
+        lastPingAt = t + PING_INTERVAL[0] + Math.random() * (PING_INTERVAL[1] - PING_INTERVAL[0]);
       }
 
-      rafId = requestAnimationFrame(step);
+      rafId = requestAnimationFrame(frame);
     }
 
-    function start() {
-      if (rafId) return;
-      running = true;
-      lastT = 0;
-      rafId = requestAnimationFrame(step);
-    }
-    function stop() {
-      running = false;
-      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-    }
+    function start() { if (rafId) return; running = true; lastT = 0; rafId = requestAnimationFrame(frame); }
+    function stop()  { running = false; if (rafId) { cancelAnimationFrame(rafId); rafId = 0; } }
 
-    let canvasResizeTimer = 0;
-    const scheduleCanvasResize = () => {
-      clearTimeout(canvasResizeTimer);
-      canvasResizeTimer = setTimeout(resize, 120);
-    };
-    window.addEventListener("resize", scheduleCanvasResize, { passive: true });
-    window.addEventListener("orientationchange", scheduleCanvasResize, { passive: true });
+    window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", (e) => {
       const rect = canvas.getBoundingClientRect();
-      mx = e.clientX - rect.left;
-      my = e.clientY - rect.top;
+      tmx = e.clientX - rect.left;
+      tmy = e.clientY - rect.top;
+      if (mx < -1000) { mx = tmx; my = tmy; }
     }, { passive: true });
-    window.addEventListener("pointerleave", () => { mx = my = -9999; });
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) stop(); else start();
-    });
+    window.addEventListener("pointerleave", () => { tmx = -9999; });
+    document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); else start(); });
 
     resize();
     start();
   }
 
   /* ============================================================
-     3. Hero proximity headline — transform-only, no reflow
-     - reads pointer once per rAF
-     - writes two CSS variables (--mx, --my) on the title
-     - each word uses transform: translate3d(calc(...), calc(...), 0)
-     - zero font-weight or letter-spacing animation (no reflow)
+     3. HUD headline — 3D tilt + continuous scan line
+     Pure transform animation, no reflow.
      ============================================================ */
-  const title = document.querySelector("[data-proximity-target]");
+  const title = document.querySelector("[data-tactical-title]");
   if (title && !reducedMotion && !isCoarse) {
-    let pmx = 0, pmy = 0;          // pointer relative to title (-1..1)
-    let cur = { x: 0, y: 0 };      // smoothed
+    let pmx = 0, pmy = 0;          // target normalized -1..1
+    let cur = { x: 0, y: 0 };
     let raf = 0;
     let active = false;
-    const SMOOTH = 0.12;           // easing toward target
 
     function onMove(e) {
       const r = title.getBoundingClientRect();
-      const px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
-      const py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-      pmx = Math.max(-1.4, Math.min(1.4, px));
-      pmy = Math.max(-1.4, Math.min(1.4, py));
+      pmx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)));
+      pmy = Math.max(-1, Math.min(1, (e.clientY - (r.top  + r.height / 2)) / (r.height / 2)));
       if (!active) { active = true; raf = requestAnimationFrame(loop); }
     }
-
-    function onLeave() {
-      pmx = 0; pmy = 0;
-    }
+    function onLeave() { pmx = 0; pmy = 0; }
 
     function loop() {
-      cur.x += (pmx - cur.x) * SMOOTH;
-      cur.y += (pmy - cur.y) * SMOOTH;
-      title.style.setProperty("--mx", cur.x.toFixed(3));
-      title.style.setProperty("--my", cur.y.toFixed(3));
-      if (Math.abs(cur.x - pmx) > 0.001 || Math.abs(cur.y - pmy) > 0.001 || pmx !== 0 || pmy !== 0) {
+      cur.x += (pmx - cur.x) * 0.10;
+      cur.y += (pmy - cur.y) * 0.10;
+      title.style.setProperty("--tx", cur.x.toFixed(3));
+      title.style.setProperty("--ty", cur.y.toFixed(3));
+      if (Math.abs(cur.x - pmx) > 0.001 || Math.abs(cur.y - pmy) > 0.001 || pmx || pmy) {
         raf = requestAnimationFrame(loop);
       } else {
         active = false;
-        title.style.setProperty("--mx", 0);
-        title.style.setProperty("--my", 0);
+        title.style.setProperty("--tx", 0);
+        title.style.setProperty("--ty", 0);
       }
     }
 
@@ -285,14 +332,27 @@
   });
 
   /* ============================================================
-     7. Scroll-spy: active section dot
+     7. Section indicator — clickable dots
+     ============================================================ */
+  document.querySelectorAll("[data-indicator-dot]").forEach((dot) => {
+    dot.style.cursor = "pointer";
+    dot.addEventListener("click", () => {
+      const id = dot.getAttribute("data-target");
+      if (!id) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset();
+      window.scrollTo({ top, behavior: reducedMotion ? "auto" : "smooth" });
+    });
+  });
+
+  /* ============================================================
+     8. Scroll-spy: active indicator dot
      ============================================================ */
   const sectionsToSpy = ["home","why","products","faq","contact"]
     .map((id) => document.getElementById(id))
     .filter(Boolean);
   const indicatorDots = document.querySelectorAll("[data-indicator-dot]");
-  const indicatorNum = document.querySelector("[data-indicator-num]");
-  const sectionNums = { home: "01", why: "02", products: "03", faq: "04", contact: "05" };
 
   if ("IntersectionObserver" in window && sectionsToSpy.length) {
     const observer = new IntersectionObserver((entries) => {
@@ -303,7 +363,6 @@
       if (best) {
         const id = best.target.id;
         indicatorDots.forEach((d) => d.classList.toggle("is-active", d.getAttribute("data-target") === id));
-        if (indicatorNum && sectionNums[id]) indicatorNum.textContent = sectionNums[id];
       }
     }, {
       rootMargin: "-40% 0px -50% 0px",
@@ -313,7 +372,7 @@
   }
 
   /* ============================================================
-     8. Scroll reveal
+     9. Scroll reveal
      ============================================================ */
   if ("IntersectionObserver" in window) {
     const revealObs = new IntersectionObserver((entries) => {
@@ -330,7 +389,7 @@
   }
 
   /* ============================================================
-     9. FAQ accordion (one open at a time)
+    10. FAQ accordion (one open at a time)
      ============================================================ */
   const faqItems = document.querySelectorAll(".faq-item");
   faqItems.forEach((item) => {
@@ -342,7 +401,7 @@
   });
 
   /* ============================================================
-    10. Product category tabs (home + products page)
+    11. Product category tabs
      ============================================================ */
   const catTabs = document.querySelectorAll("[data-cat-tab]");
   const catPanels = document.querySelectorAll("[data-cat-panel]");
@@ -368,7 +427,7 @@
   catTabs.forEach((t) => t.addEventListener("click", () => switchProductCategory(t.getAttribute("data-cat-tab"))));
 
   /* ============================================================
-    11. Add-to-cart buttons (delegated)
+    12. Add-to-cart (delegated)
      ============================================================ */
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-add-to-cart]");
@@ -392,7 +451,7 @@
   }
 
   /* ============================================================
-    12. Cart drawer + counter sync
+    13. Cart drawer + counter sync
      ============================================================ */
   function refreshCartUI() {
     if (!window.LR_CART) return;
@@ -423,10 +482,13 @@
         body.innerHTML = items.map((it) => {
           const p = window.LR_DATA.getProduct(it.id);
           if (!p) return "";
+          const cartArt = p.image
+            ? `<img class="product-art__image" src="${p.image}" alt="${p.name}" loading="lazy" decoding="async">`
+            : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? 'game' : 'legend'}">${l}</span>`).join("");
           return `
             <div class="cart-line" data-cart-line="${p.id}">
-              <div class="cart-line__art product-art product-art--${p.art.kind}">
-                ${p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? 'game' : 'legend'}">${l}</span>`).join("")}
+              <div class="cart-line__art">
+                <div class="product-art product-art--${p.art.kind}${p.image ? " product-art--image" : ""}">${cartArt}</div>
               </div>
               <div class="cart-line__body">
                 <div class="cart-line__cat">${(window.LR_DATA.getCategory(p.cat)||{}).name||""}</div>
@@ -471,7 +533,6 @@
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeCartDrawer(); });
 
-  // cart line qty controls (delegated, works on drawer & cart page)
   document.addEventListener("click", (e) => {
     const line = e.target.closest("[data-cart-line]");
     if (!line || !window.LR_CART) return;
@@ -488,7 +549,6 @@
   });
 
   window.addEventListener("cart:change", refreshCartUI);
-  // initial UI refresh (after partials inject)
   setTimeout(refreshCartUI, 60);
 
 })();

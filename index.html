@@ -17,17 +17,14 @@
 <body>
   <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
 
-  <!-- header injected by partials.js -->
-
-  <aside class="section-indicator" aria-hidden="true">
-    <span class="section-indicator__num" data-indicator-num>01</span>
+  <aside class="section-indicator" aria-label="مؤشر الأقسام">
     <span class="section-indicator__line section-indicator__line--top"></span>
     <ul class="section-indicator__dots">
-      <li><span class="dot is-active" data-indicator-dot data-target="home"></span></li>
-      <li><span class="dot" data-indicator-dot data-target="why"></span></li>
-      <li><span class="dot" data-indicator-dot data-target="products"></span></li>
-      <li><span class="dot" data-indicator-dot data-target="faq"></span></li>
-      <li><span class="dot" data-indicator-dot data-target="contact"></span></li>
+      <li><span class="dot is-active" data-indicator-dot data-target="home"   title="الرئيسية"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="why"      title="لماذا LOADRYX"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="products" title="المتجر"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="faq"      title="الأسئلة الشائعة"></span></li>
+      <li><span class="dot" data-indicator-dot data-target="contact"  title="تواصل معنا"></span></li>
     </ul>
     <span class="section-indicator__line section-indicator__line--bot"></span>
     <span class="section-indicator__brand">LR</span>
@@ -36,7 +33,7 @@
   <main id="main">
 
     <!-- ========================================================
-         HERO
+         HERO  — Tactical premium landing
     ========================================================= -->
     <section class="hero" id="home" aria-label="الرئيسية">
 
@@ -45,12 +42,14 @@
           class="hero-video"
           autoplay muted loop playsinline
           preload="metadata"
+          oncontextmenu="return false"
           poster="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779661749/X2_pw7s8m.png">
           <source src="https://res.cloudinary.com/dmp1fo2j4/video/upload/v1779660274/X_4K_szqe2e.mp4" type="video/mp4" />
         </video>
         <img class="hero-fallback"
           src="https://res.cloudinary.com/dmp1fo2j4/image/upload/v1779661749/X2_pw7s8m.png"
-          alt="" loading="eager" decoding="async" />
+          alt="" loading="eager" decoding="async"
+          oncontextmenu="return false" draggable="false" />
       </div>
 
       <div class="hero-overlay hero-overlay--vignette" aria-hidden="true"></div>
@@ -64,6 +63,7 @@
         </svg>
       </div>
 
+      <!-- Tactical Signal Field canvas -->
       <canvas id="hero-particles" class="hero-particles" aria-hidden="true"></canvas>
 
       <div class="hud" aria-hidden="true">
@@ -87,16 +87,19 @@
       </div>
 
       <div class="hero-content">
-        <span class="hero-eyebrow">LOADRYX · STORE</span>
-        <h1 class="hero-title" data-proximity-target>
-          <span class="hero-title__line hero-title__line--top" data-proximity-line>
-            <span class="prox-char">مُصمَّم</span>
-            <span class="prox-char">للاستجابة</span>
+        <span class="hero-eyebrow">LOADRYX · TACTICAL STORE</span>
+
+        <h1 class="hero-title" data-tactical-title>
+          <span class="hero-title__corner hero-title__corner--tl"></span>
+          <span class="hero-title__corner hero-title__corner--tr"></span>
+          <span class="hero-title__inner">
+            <span class="hero-title__line hero-title__line--top">مُصمَّم للاستجابة</span>
+            <span class="hero-title__line hero-title__line--bot">
+              <span class="hero-title__scan">مبني للانتصار</span>
+            </span>
           </span>
-          <span class="hero-title__line hero-title__line--bot" data-proximity-line>
-            <span class="prox-char">مبني</span>
-            <span class="prox-char">للانتصار</span>
-          </span>
+          <span class="hero-title__corner hero-title__corner--bl"></span>
+          <span class="hero-title__corner hero-title__corner--br"></span>
         </h1>
 
         <p class="hero-subtitle">
@@ -119,11 +122,6 @@
             </svg>
           </a>
         </div>
-
-        <div class="hero-trust">
-          <span class="hero-trust__item"><span class="hero-trust__dot"></span>دفع آمن — مدى, VISA, Apple Pay, tabby, tamara</span>
-          <span class="hero-trust__item"><span class="hero-trust__dot"></span>دعم فني سريع عبر واتساب</span>
-        </div>
       </div>
     </section>
 
@@ -133,7 +131,7 @@
     <section class="section section--why" id="why" aria-labelledby="why-heading">
       <div class="section-inner">
         <header class="section-head">
-          <span class="eyebrow"><span class="eyebrow__num">02</span><span class="eyebrow__bar"></span>لماذا LOADRYX</span>
+          <span class="eyebrow">لماذا LOADRYX</span>
           <h2 class="section-title" id="why-heading">
             تجربة لاعب، <span class="text-blue">لا تجربة منتج.</span>
           </h2>
@@ -232,12 +230,12 @@
       <div class="section-inner">
         <header class="section-head section-head--row">
           <div>
-            <span class="eyebrow"><span class="eyebrow__num">03</span><span class="eyebrow__bar"></span>المتجر</span>
+            <span class="eyebrow">المتجر</span>
             <h2 class="section-title" id="products-heading">
               المنتجات <span class="text-blue">والباكجات.</span>
             </h2>
           </div>
-          <a href="products.html" class="btn btn--ghost-line btn--sm">عرض الكل
+          <a href="products.html" class="btn btn--ghost-line btn--sm">عرض جميع المنتجات
             <svg viewBox="0 0 24 24" aria-hidden="true" width="14" height="14"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
           </a>
         </header>
@@ -245,27 +243,21 @@
         <nav class="cat-tabs" role="tablist" aria-label="فئات المنتجات">
           <button class="cat-tab is-active" role="tab" aria-selected="true" data-cat-tab="ps5">
             <span class="cat-tab__name">PS5 AI</span>
-            <span class="cat-tab__count">7 منتجات</span>
           </button>
           <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="setting">
             <span class="cat-tab__name">Setting AI</span>
-            <span class="cat-tab__count">منتجان</span>
           </button>
           <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="script">
             <span class="cat-tab__name">Script Xim Matrix</span>
-            <span class="cat-tab__count">منتجان</span>
           </button>
           <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="accessories">
-            <span class="cat-tab__name">الملحقات</span>
-            <span class="cat-tab__count">3 منتجات</span>
+            <span class="cat-tab__name">Accessories</span>
           </button>
           <button class="cat-tab" role="tab" aria-selected="false" data-cat-tab="games">
             <span class="cat-tab__name">الألعاب</span>
-            <span class="cat-tab__count">قريباً</span>
           </button>
         </nav>
 
-        <!-- product panels rendered by render-home.js -->
         <div data-home-products></div>
       </div>
     </section>
@@ -276,7 +268,7 @@
     <section class="section section--faq" id="faq" aria-labelledby="faq-heading">
       <div class="section-inner section-inner--narrow">
         <header class="section-head section-head--center">
-          <span class="eyebrow"><span class="eyebrow__num">04</span><span class="eyebrow__bar"></span>الأسئلة الشائعة</span>
+          <span class="eyebrow">الأسئلة الشائعة</span>
           <h2 class="section-title" id="faq-heading">
             إجابات سريعة، <span class="text-blue">بدون التفاف.</span>
           </h2>
@@ -284,7 +276,7 @@
         </header>
 
         <div class="faq" role="list">
-          <details class="faq-item" data-reveal open>
+          <details class="faq-item" data-reveal>
             <summary class="faq-item__q">
               <span>هل البرنامج آمن؟ هل يمكن أن يأخذ بان أو يطير الأكاونت؟</span>
               <span class="faq-item__icon" aria-hidden="true"></span>
@@ -305,16 +297,7 @@
               <span class="faq-item__icon"></span>
             </summary>
             <div class="faq-item__a">
-              <p>نقبل جميع طرق الدفع الرئيسية: <strong>مدى، VISA، Mastercard، Apple Pay، STC Pay</strong>، إضافةً إلى التقسيط عبر <strong>tabby</strong> و<strong>tamara</strong>.</p>
-              <div class="pay-row">
-                <span class="pay-chip">مدى</span>
-                <span class="pay-chip">VISA</span>
-                <span class="pay-chip">Mastercard</span>
-                <span class="pay-chip">Apple Pay</span>
-                <span class="pay-chip">STC Pay</span>
-                <span class="pay-chip pay-chip--accent">tabby</span>
-                <span class="pay-chip pay-chip--accent">tamara</span>
-              </div>
+              <p>نقبل جميع طرق الدفع الرئيسية: <strong>مدى، VISA، Mastercard، Apple Pay، STC Pay</strong>، إضافةً إلى التقسيط عبر <strong>tabby</strong> و<strong>tamara</strong>. القائمة الكاملة معروضة في أسفل الصفحة.</p>
             </div>
           </details>
 
@@ -344,7 +327,7 @@
     <section class="section section--contact" id="contact" aria-labelledby="contact-heading">
       <div class="section-inner">
         <header class="section-head section-head--center">
-          <span class="eyebrow"><span class="eyebrow__num">05</span><span class="eyebrow__bar"></span>تواصل معنا</span>
+          <span class="eyebrow">تواصل معنا</span>
           <h2 class="section-title" id="contact-heading">
             فريقنا جاهز <span class="text-blue">للرد فوراً.</span>
           </h2>
@@ -391,23 +374,8 @@
             </div>
           </a>
         </div>
-
-        <div class="contact-pay">
-          <span class="contact-pay__label">طرق الدفع المتاحة</span>
-          <div class="contact-pay__chips">
-            <span class="pay-chip">مدى</span>
-            <span class="pay-chip">VISA</span>
-            <span class="pay-chip">Mastercard</span>
-            <span class="pay-chip">Apple Pay</span>
-            <span class="pay-chip">STC Pay</span>
-            <span class="pay-chip pay-chip--accent">tabby</span>
-            <span class="pay-chip pay-chip--accent">tamara</span>
-          </div>
-        </div>
       </div>
     </section>
-
-    <!-- footer injected by partials.js -->
   </main>
 
   <script src="data.js" defer></script>

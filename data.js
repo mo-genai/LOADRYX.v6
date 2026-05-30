@@ -29,14 +29,14 @@
     },
     {
       slug: "accessories",
-      name: "الملحقات",
+      name: "Accessories",
       tagline: "أجهزة ومحولات لتجربة لعب احترافية",
       desc: "ملحقات احترافية مختارة بعناية لتكمل تجربتك التنافسية.",
     },
     {
       slug: "games",
       name: "الألعاب",
-      tagline: "قسم الألعاب — قريباً",
+      tagline: "قسم الألعاب",
       desc: "نعمل على إضافة منتجات هذا القسم. تابعنا لآخر التحديثات.",
     },
   ];
@@ -111,6 +111,7 @@
       art: { kind: opts.kind || "game", lines: opts.lines },
       price: opts.price,
       badge: opts.badge,
+      image: opts.image || null,
       short: `نظام تصويب ذكي يعتمد على الذكاء الاصطناعي لتحليل الصورة وتحسين الـ Aim بشكل احترافي أثناء اللعب — مصمم خصيصاً لـ ${opts.upper} على PS5.`,
       intro: `هل تريد التفوق في ${opts.upper} وتحقيق دقة تصويب أعلى في المواجهات؟ مع AI AIM PROGRAM ستحصل على نظام تصويب ذكي يعتمد على الذكاء الاصطناعي لتحليل الصورة وتحسين الـ Aim بشكل احترافي أثناء اللعب. البرنامج يعمل مع الكونسول PS5 عبر الـ PC باستخدام تحليل الصورة المباشر، مما يساعدك على تحسين سرعة التصويب والثبات في الاشتباكات.`,
       sections: [
@@ -134,6 +135,7 @@
       title: "PS5 AI AIM PACKAGE — ULTIMATE EDITION",
       art: { kind: "ultimate", lines: ["PS5 AI", "ULTIMATE EDITION"] },
       price: 10500,
+      image: "ps5-ai-ultimate.png",
       badge: { text: "الباكج الكامل", kind: "featured" },
       short: "7 ألعاب كاملة، إعداد احترافي، ودعم متواصل. أعلى تجربة AI Aim للـ PS5.",
       intro: "هل تريد السيطرة في ألعاب الشوتر على PS5 وتحقيق Aim احترافي بمساعدة الذكاء الاصطناعي؟ مع باكج PS5 AI AIM ستحصل على نظام تصويب ذكي يعتمد على AI لتحليل الصورة المباشر وتحسين الأداء داخل اللعبة بشكل احترافي، مع إعدادات مخصصة لكل لعبة لتحقيق أفضل ثبات وسرعة استجابة أثناء اللعب.",
@@ -182,12 +184,12 @@
         { heading: "الأمان", items: AI_SAFETY },
       ],
     },
-    ps5Game({ id: "ps5-ai-apex",     name: "PS5 AI — Apex Legends",   upper: "APEX LEGENDS",  lines: ["APEX", "LEGENDS"],   price: 1426 }),
-    ps5Game({ id: "ps5-ai-cod",      name: "PS5 AI — Call of Duty",   upper: "CALL of DUTY",  lines: ["CALL", "OF DUTY"],   price: 1426 }),
-    ps5Game({ id: "ps5-ai-valorant", name: "PS5 AI — Valorant",       upper: "VALORANT",      lines: ["VALORANT"],          price: 1426 }),
-    ps5Game({ id: "ps5-ai-overwatch",name: "PS5 AI — Overwatch",      upper: "OVERWATCH",     lines: ["OVER", "WATCH"],     price: 1426 }),
-    ps5Game({ id: "ps5-ai-fortnite", name: "PS5 AI — Fortnite",       upper: "FORTNITE",      lines: ["FORT", "NITE"],      price: 1500 }),
-    ps5Game({ id: "ps5-ai-arc",      name: "PS5 AI — ARC Raiders",    upper: "ARC RAIDERS",   lines: ["ARC", "RAIDERS"],    price: 1426 }),
+    ps5Game({ id: "ps5-ai-apex",     name: "PS5 AI — Apex Legends",   upper: "APEX LEGENDS",  lines: ["APEX", "LEGENDS"],   price: 1426, image: "ps5-ai-apex.png" }),
+    ps5Game({ id: "ps5-ai-cod",      name: "PS5 AI — Call of Duty",   upper: "CALL of DUTY",  lines: ["CALL", "OF DUTY"],   price: 1426, image: "ps5-ai-cod.png" }),
+    ps5Game({ id: "ps5-ai-valorant", name: "PS5 AI — Valorant",       upper: "VALORANT",      lines: ["VALORANT"],          price: 1426, image: "ps5-ai-valorant.png" }),
+    ps5Game({ id: "ps5-ai-overwatch",name: "PS5 AI — Overwatch",      upper: "OVERWATCH",     lines: ["OVER", "WATCH"],     price: 1426, image: "ps5-ai-overwatch.png" }),
+    ps5Game({ id: "ps5-ai-fortnite", name: "PS5 AI — Fortnite",       upper: "FORTNITE",      lines: ["FORT", "NITE"],      price: 1500, image: "ps5-ai-fortnite.png" }),
+    ps5Game({ id: "ps5-ai-arc",      name: "PS5 AI — ARC Raiders",    upper: "ARC RAIDERS",   lines: ["ARC", "RAIDERS"],    price: 1426, image: "ps5-ai-arc.png" }),
 
     /* ----- Setting AI ------------------------------------------ */
     {
@@ -251,6 +253,8 @@
       title: "WARZONE PRO SCRIPT",
       art: { kind: "script", lines: ["SCRIPT", "WARZONE"] },
       price: 200,
+      image: "warzone_script.png",
+      images: ["warzone_script.png"],
       short: "Aim Assist متطور، ثبات عالٍ، إعدادات احترافية متوافقة مع جميع المنصات.",
       intro: "سكربت احترافي مصمم خصيصاً ليمنحك أفضل أداء وثبات في التصويب داخل لعبة Warzone. متوافق مع جميع المنصات: PC، PS5، PS4، Xbox — ويعمل بسلاسة لأفضل تجربة لعب ممكنة.",
       sections: [
@@ -284,6 +288,8 @@
       title: "BLACK OPS 7 DMA SCRIPT",
       art: { kind: "script", lines: ["BLACK OPS 7", "DMA"] },
       price: 150,
+      image: "script-bo7-dma.png",
+      images: ["script-bo7-dma.png"],
       short: "قراءة بيانات لعبة متقدمة عبر الـ DMA لتجربة احترافية متكاملة.",
       intro: "سكربت Black Ops 7 الاحترافي — نوع من الأدوات والإعدادات المتقدمة المستخدمة مع الأجهزة الخارجية لتحسين قراءة بيانات اللعبة بشكل مباشر عبر الـ PC، يستخدمه اللاعبون التنافسيون للحصول على معلومات إضافية أثناء اللعب.",
       sections: [
@@ -297,6 +303,7 @@
           ],
         },
       ],
+      sections: [],
     },
 
     /* ----- Accessories ----------------------------------------- */
@@ -325,6 +332,47 @@
           note: "هذا المنتج متاح للحجز المسبق فقط — يتم التواصل معك عند توفّر الكمية.",
         },
       ],
+      image: "titan-two.png",
+      images: ["titan-two.png"],
+      short: "يأتي Titan Two كجهاز Adapter متقدم يدعم البرمجة والـ Mods، ومخصص للاعبين الذين يحتاجون تحكماً أوسع على أجهزة الكونسول والكمبيوتر.",
+      intro: "يأتي Titan Two كجهاز Adapter متقدم يدعم البرمجة والـ Mods، ومخصص للاعبين الذين يحتاجون تحكماً أوسع على أجهزة الكونسول والكمبيوتر.",
+      sections: [
+        {
+          heading: "إمكانية الاستخدام",
+          items: [
+            "يد التحكم المفضلة لديك",
+            "الكيبورد والماوس",
+            "الجويستك",
+            "Arcade Stick",
+            "Flight Stick",
+            "ومعظم وحدات التحكم المختلفة",
+          ],
+        },
+        {
+          heading: "التوافق",
+          note: "يعمل على أجهزة الكونسول والكمبيوتر بسلاسة.",
+        },
+        {
+          heading: "تخصيص كامل",
+          items: [
+            "يمكنك تعديل توزيع الأزرار",
+            "حساسية وتحركات الأنالوج",
+            "وإعدادات التحكم بالكامل بما يناسب أسلوب لعبك.",
+          ],
+        },
+        {
+          heading: "خصائص التحكم",
+          items: ["يدعم Titan Two مجموعة من أدوات التحكم المتقدمة، مثل:", "Mods", "Macros", "Rapid Fire", "Anti-Recoil", "Aim Assist"],
+        },
+        {
+          heading: "دعم XIM APEX",
+          note: "يدعم Titan Two جهاز XIM APEX Mouse & Keyboard Adapter.",
+        },
+        {
+          heading: "ملاحظة",
+          note: "هذا المنتج متاح للحجز المسبق فقط - يتم التواصل معك عند توفر الكمية.",
+        },
+      ],
     },
     {
       id: "brook-wingman-fgc2",
@@ -346,6 +394,17 @@
           ],
         },
       ],
+      image: "brook-wingman-fgc2.png",
+      images: [
+        "brook-wingman-fgc2.png",
+        "brook-wingman-fgc2.2.png",
+        "brook-wingman-fgc2.3.png",
+        "brook-wingman-fgc2.4.png",
+        "brook-wingman-fgc2.5.png",
+      ],
+      short: "محول عصا التحكم Arcade لدعم PS5 والكمبيوتر الشخصي.",
+      intro: "محول Brook Wingman FGC2 - محول عصا التحكم Arcade لدعم PS5 والكمبيوتر الشخصي.",
+      sections: [],
     },
     {
       id: "p5-general",
@@ -362,8 +421,22 @@
           items: ["متوافق مع PS5", "تركيب بسيط", "أداء مستقر"],
         },
       ],
+      name: "p5 general",
+      title: "P5 GENERAL",
+      image: "p5-general.png",
+      images: ["p5-general.png", "p5-general.2.png", "p5-general.3.png", "p5-general.4.png"],
+      short: "منشط ألعاب PS5 من الجيل الثاني بتردد 1000 هرتز ثنائي الاتجاه.",
+      intro: "منشط ألعاب PS5 من الجيل الثاني بتردد 1000 هرتز ثنائي الاتجاه<br>يدعم HITBOX لـ Raspberry Pi COLOR MATRIX Reasnow وطرفين خارجيين آخرين<br><br>(قد تختلف الكلمات المطبوعة على المنتج حسب الدفعة، ولكن ذلك لا يؤثر على الاستخدام)<br>اللون أسود<br>المادة بلاستيك<br><br>محتويات العبوة<br>منفذ USB لجهاز P5General لتفعيل ألعاب PS5<br><br>فقط محتوى الحزمة أعلاه، لا يتم تضمين المنتجات الأخرى.<br><br>ملاحظة: قد يؤدي انعكاس الضوء واختلاف شاشات العرض إلى اختلاف بسيط في لون العنصر الظاهر في الصورة مقارنة باللون الفعلي. هامش الخطأ المسموح به في القياسات هو +- 1-3 سم.",
+      sections: [],
     },
   ];
+
+  PRODUCTS.forEach((product) => {
+    const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    if (!images.length && product.image) images.push(product.image);
+    product.images = images;
+    if (!product.image && images.length) product.image = images[0];
+  });
 
   /* -- helpers --------------------------------------------------- */
   function getCategory(slug) {

@@ -22,7 +22,41 @@
   const SVG = {
     cart: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h2.2l2 11.2A2 2 0 0 0 10.2 18h7.6a2 2 0 0 0 2-1.7l1.3-7.3H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/><circle cx="10" cy="21" r="1.2" fill="currentColor"/><circle cx="18" cy="21" r="1.2" fill="currentColor"/></svg>`,
     arrow: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H6M11 6 5 12l6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>`,
+    galleryPrev: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></svg>`,
+    galleryNext: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter"/></svg>`,
   };
+
+  function productImages(p) {
+    if (Array.isArray(p.images) && p.images.length) return p.images;
+    return p.image ? [p.image] : [];
+  }
+
+  function primaryImage(p) {
+    return productImages(p)[0] || null;
+  }
+
+  function productArtHTML(p, opts = {}) {
+    const isUltimate = p.art.kind === "ultimate";
+    const image = primaryImage(p);
+    const content = image
+      ? `<img class="product-art__image" src="${image}" alt="${p.name}" loading="${opts.eager ? "eager" : "lazy"}" decoding="async">`
+      : isUltimate
+        ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
+        : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
+
+    return `<div class="product-art product-art--${p.art.kind}${image ? " product-art--image" : ""}">${content}</div>`;
+  }
+
+  function productGalleryHTML(p) {
+    const images = productImages(p);
+    if (images.length < 2) return "";
+    return `<div class="product-gallery" aria-label="صور المنتج">
+      ${images.map((src, i) => `
+        <button class="product-gallery__thumb${i === 0 ? " is-active" : ""}" type="button" data-product-thumb="${src}" data-product-thumb-index="${i}" aria-label="عرض صورة ${i + 1}">
+          <img src="${src}" alt="" loading="lazy" decoding="async">
+        </button>`).join("")}
+      </div>`;
+  }
 
   /* -- product card HTML ----------------------------------------- */
   function cardHTML(p, opts = {}) {
@@ -31,18 +65,14 @@
     const badge = p.badge
       ? `<span class="badge ${p.badge.kind === "reserve" ? "badge--reserve" : "badge--featured"}">${p.badge.text}</span>`
       : "";
-    const isUltimate = p.art.kind === "ultimate";
-    const artInner = isUltimate
-      ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
-      : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
     const desc = p.short ? `<p class="product-card__desc">${p.short}</p>` : "";
 
     return `
-    <article class="product-card${isFeatured ? " product-card--featured" : ""}" data-reveal>
+    <article class="product-card${isFeatured ? " product-card--featured" : ""}" data-reveal data-product-cat="${p.cat}">
       <a class="product-card__media-link" href="product.html?id=${p.id}" aria-label="${p.name}">
         <div class="product-card__media">
           ${badge}
-          <div class="product-art product-art--${p.art.kind}">${artInner}</div>
+          ${productArtHTML(p)}
         </div>
       </a>
       <div class="product-card__body">
@@ -146,10 +176,6 @@
       crumbCatEl.href = `category.html?cat=${p.cat}`;
     }
 
-    const isUltimate = p.art.kind === "ultimate";
-    const artInner = isUltimate
-      ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
-      : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
     const badge = p.badge
       ? `<span class="badge ${p.badge.kind === "reserve" ? "badge--reserve" : "badge--featured"}">${p.badge.text}</span>`
       : "";
@@ -158,12 +184,19 @@
 
     host.innerHTML = `
       <div class="product-detail__grid">
-        <div class="product-detail__media">
-          ${badge}
-          <div class="product-art product-art--${p.art.kind}">${artInner}</div>
+        <div class="product-detail__media" data-product-gallery-root>
+          <div class="product-media__stage">
+            ${badge}
+            ${productArtHTML(p, { eager: true })}
+            ${productImages(p).length > 1 ? `
+              <button class="product-gallery__arrow product-gallery__arrow--prev" type="button" data-gallery-prev aria-label="الصورة السابقة">${SVG.galleryPrev}</button>
+              <button class="product-gallery__arrow product-gallery__arrow--next" type="button" data-gallery-next aria-label="الصورة التالية">${SVG.galleryNext}</button>
+            ` : ""}
+          </div>
+          ${productGalleryHTML(p)}
         </div>
         <div class="product-detail__body">
-          <span class="product-detail__cat">${cat ? cat.name : ""}</span>
+          <a class="product-detail__cat" href="products.html#${p.cat}">${cat ? cat.name : ""}</a>
           <h1 class="product-detail__title">${p.name}</h1>
 
           <div class="product-detail__price-row">
@@ -183,7 +216,7 @@
               <button type="button" data-stepper-inc aria-label="زائد">+</button>
             </div>
             <button class="btn btn--primary btn--solid btn--full" type="button" data-add-to-cart="${p.id}" data-qty="1">
-              ${SVG.cart}<span>أضف للسلة</span>
+                <span>أضف للسلة</span>
             </button>
             <a href="https://wa.me/966573534407?text=${encodeURIComponent("استفسار عن: " + p.name)}" target="_blank" rel="noopener" class="btn btn--whats product-detail__whats" style="height:50px;">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C7.03 3 3 7.03 3 12c0 1.58.42 3.07 1.14 4.36L3 21l4.78-1.12A8.96 8.96 0 0 0 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
@@ -231,6 +264,26 @@
         if (v > 99) v = 99;
         input.value = v; sync();
       });
+    }
+
+    const media = host.querySelector("[data-product-gallery-root]");
+    const mainImage = media ? media.querySelector(".product-art__image") : null;
+    const thumbs = media ? Array.from(media.querySelectorAll("[data-product-thumb]")) : [];
+    if (mainImage && thumbs.length) {
+      let activeIndex = 0;
+      const setActiveImage = (nextIndex) => {
+        activeIndex = (nextIndex + thumbs.length) % thumbs.length;
+        const thumb = thumbs[activeIndex];
+        mainImage.src = thumb.getAttribute("data-product-thumb");
+        thumbs.forEach((item, index) => item.classList.toggle("is-active", index === activeIndex));
+      };
+      thumbs.forEach((thumb, index) => {
+        thumb.addEventListener("click", () => setActiveImage(index));
+      });
+      const prev = media.querySelector("[data-gallery-prev]");
+      const next = media.querySelector("[data-gallery-next]");
+      if (prev) prev.addEventListener("click", () => setActiveImage(activeIndex - 1));
+      if (next) next.addEventListener("click", () => setActiveImage(activeIndex + 1));
     }
   }
 
@@ -300,14 +353,9 @@
       const p = window.LR_DATA.getProduct(it.id);
       if (!p) return "";
       const cat = window.LR_DATA.getCategory(p.cat);
-      const isUltimate = p.art.kind === "ultimate";
-      const artInner = isUltimate
-        ? `<span class="product-art__title">${p.art.lines[0]}</span><span class="product-art__sub">${p.art.lines[1] || ""}</span>`
-        : p.art.lines.map((l, i) => `<span class="product-art__${i === 0 ? "game" : "legend"}">${l}</span>`).join("");
-
       return `
       <div class="cart-row" data-cart-line="${p.id}">
-        <div class="cart-row__art product-art product-art--${p.art.kind}">${artInner}</div>
+        <div class="cart-row__art">${productArtHTML(p)}</div>
         <div>
           <div class="cart-row__cat">${cat ? cat.name : ""}</div>
           <a class="cart-row__name" href="product.html?id=${p.id}">${p.name}</a>

@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#02070D" />
   <title>المنتجات — LOADRYX</title>
-  <meta name="description" content="جميع منتجات LOADRYX — باكجات PS5 AI، سكربتات Xim Matrix، خدمات Setting AI، والملحقات." />
+  <meta name="description" content="جميع منتجات LOADRYX — باكجات PS5 AI، سكربتات Xim Matrix، خدمات Setting AI، و Accessories." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="products-compact.css" />
 </head>
 <body>
   <a class="skip-link" href="#main">تخطّى إلى المحتوى</a>
@@ -23,22 +24,20 @@
           <span class="breadcrumbs__item--current">المنتجات</span>
         </nav>
         <h1 class="page-title">جميع <span class="text-blue">المنتجات.</span></h1>
-        <p class="page-sub">تصفّح المتجر كاملاً — من باكجات الذكاء الاصطناعي للـ PS5 إلى السكربتات الاحترافية والملحقات.</p>
+        <p class="page-sub">تصفّح المتجر كاملاً — من باكجات الذكاء الاصطناعي للـ PS5 إلى السكربتات الاحترافية و Accessories.</p>
       </div>
     </section>
 
     <section class="section section--deep">
       <div class="section-inner">
         <nav class="cat-tabs" aria-label="فلترة الفئة" style="margin-bottom:32px;">
-          <a class="cat-tab is-active" href="products.html">
-            <span class="cat-tab__name">الكل</span>
-            <span class="cat-tab__count" data-count-all></span>
+          <a class="cat-tab is-active" href="products.html" data-products-filter="all">
+            <span class="cat-tab__name">جميع المنتجات</span>
           </a>
-          <a class="cat-tab" href="category.html?cat=ps5"><span class="cat-tab__name">PS5 AI</span><span class="cat-tab__count">7 منتجات</span></a>
-          <a class="cat-tab" href="category.html?cat=setting"><span class="cat-tab__name">Setting AI</span><span class="cat-tab__count">منتجان</span></a>
-          <a class="cat-tab" href="category.html?cat=script"><span class="cat-tab__name">Script Xim Matrix</span><span class="cat-tab__count">منتجان</span></a>
-          <a class="cat-tab" href="category.html?cat=accessories"><span class="cat-tab__name">الملحقات</span><span class="cat-tab__count">3 منتجات</span></a>
-          <a class="cat-tab" href="category.html?cat=games"><span class="cat-tab__name">الألعاب</span><span class="cat-tab__count">قريباً</span></a>
+          <a class="cat-tab" href="#ps5" data-products-filter="ps5"><span class="cat-tab__name">PS5 AI</span></a>
+          <a class="cat-tab" href="#setting" data-products-filter="setting"><span class="cat-tab__name">Setting AI</span></a>
+          <a class="cat-tab" href="#script" data-products-filter="script"><span class="cat-tab__name">Script Xim Matrix</span></a>
+          <a class="cat-tab" href="#accessories" data-products-filter="accessories"><span class="cat-tab__name">Accessories</span></a>
         </nav>
 
         <div data-all-products></div>
@@ -53,12 +52,54 @@
   <script src="script.js" defer></script>
   <script defer>
     document.addEventListener("DOMContentLoaded", () => {
-      const tryCount = () => {
-        if (!window.LR_DATA) return setTimeout(tryCount, 30);
-        const el = document.querySelector("[data-count-all]");
-        if (el) el.textContent = window.LR_DATA.PRODUCTS.length + " منتج";
+      let initialized = false;
+      const initFilters = () => {
+        if (!window.LR_DATA) return setTimeout(initFilters, 30);
+
+        const host = document.querySelector("[data-all-products]");
+        const cards = host ? Array.from(host.querySelectorAll(".product-card")) : [];
+        if (!host || cards.length === 0) return setTimeout(initFilters, 30);
+
+        if (initialized) return;
+        initialized = true;
+
+        const tabs = document.querySelectorAll("[data-products-filter]");
+        const filterNames = {
+          all: true,
+          ps5: true,
+          setting: true,
+          script: true,
+          accessories: true,
+        };
+        const filterProducts = (cat) => {
+          const activeCat = filterNames[cat] ? cat : "all";
+          host.querySelectorAll(".product-card").forEach((card) => {
+            const show = activeCat === "all" || card.getAttribute("data-product-cat") === activeCat;
+            card.hidden = !show;
+          });
+
+          tabs.forEach((tab) => {
+            tab.classList.toggle("is-active", tab.getAttribute("data-products-filter") === activeCat);
+          });
+        };
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", (event) => {
+            event.preventDefault();
+            const cat = tab.getAttribute("data-products-filter") || "all";
+            history.replaceState(null, "", cat === "all" ? "products.html" : "#" + cat);
+            filterProducts(cat);
+          });
+        });
+
+        const initialCat = location.hash ? location.hash.replace("#", "") : "all";
+        filterProducts(initialCat);
+        window.addEventListener("hashchange", () => {
+          filterProducts(location.hash ? location.hash.replace("#", "") : "all");
+        });
       };
-      tryCount();
+
+      initFilters();
     });
   </script>
 </body>
